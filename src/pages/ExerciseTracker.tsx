@@ -7,6 +7,7 @@ const ExerciseTracker = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const handleSaveWorkout = (workout: WorkoutLog) => {
+    // Remember to zero out seconds
     console.log(workout)
   }
 

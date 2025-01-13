@@ -10,5 +10,8 @@ export interface Exercise {
 }
 
 export interface WorkoutLog {
+  date: Date
+  startTime: Date
+  endTime: Date
   exercises: Exercise[]
 }

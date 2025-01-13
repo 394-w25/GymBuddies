@@ -1,12 +1,22 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { Calendar } from "@/components/ui/calendar"
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { format } from "date-fns"
+import { CalendarIcon, Clock } from "lucide-react"
+import { cn } from "@/lib/utils"
 import { ExerciseCard } from "./ExerciseCard"
+import { TimePicker } from "../ui/time-picker"
 import type { Exercise, WorkoutLog } from "@/types/workout"
 
 interface WorkoutLogModalProps {
@@ -21,6 +31,11 @@ export function WorkoutLogModal({
   onSave,
 }: WorkoutLogModalProps) {
   const [exercises, setExercises] = useState<Exercise[]>([])
+
+  // Needs input validation (future dates only, startTime must be before endTime)
+  const [date, setDate] = useState<Date>(new Date())
+  const [startTime, setStartTime] = useState<Date>(new Date())
+  const [endTime, setEndTime] = useState<Date>(new Date())
 
   const addExercise = () => {
     const newExercise: Exercise = {
@@ -43,11 +58,19 @@ export function WorkoutLogModal({
   }
 
   const handleSave = () => {
-    onSave({ exercises })
+    onSave({
+      date,
+      startTime,
+      endTime,
+      exercises,
+    })
     onOpenChange(false)
+    setDate(new Date())
+    setStartTime(new Date())
+    setEndTime(new Date())
   }
 
-  const onCancel = () => {
+  const onClose = () => {
     onOpenChange(false)
     setExercises([])
   }
@@ -60,12 +83,105 @@ export function WorkoutLogModal({
         showDefaultCloseButton={false}
       >
         <SheetHeader className="flex-row items-center justify-between space-y-0 pb-4">
-          <Button variant="outline" onClick={onCancel}>
+          <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
           <SheetTitle>Workout Log</SheetTitle>
           <Button onClick={handleSave}>Save</Button>
         </SheetHeader>
+
+        <div className="space-y-4 py-4">
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium">Date</label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={"outline"}
+                  className={cn(
+                    "justify-start text-left font-normal",
+                    !date && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {date ? format(date, "PPP") : <span>Pick a date</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={(date) => date && setDate(date)}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium">Start Time</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "justify-start text-left font-normal",
+                      !startTime && "text-muted-foreground"
+                    )}
+                  >
+                    <Clock className="mr-2 h-4 w-4" />
+                    {startTime ? (
+                      format(startTime, "hh:mm a")
+                    ) : (
+                      <span>Start time</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-4">
+                  <TimePicker
+                    date={startTime}
+                    setDate={(date) => {
+                      if (date !== undefined) setStartTime(date)
+                    }}
+                    showSeconds={false}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium">End Time</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "justify-start text-left font-normal",
+                      !endTime && "text-muted-foreground"
+                    )}
+                  >
+                    <Clock className="mr-2 h-4 w-4" />
+                    {endTime ? (
+                      format(endTime, "hh:mm a")
+                    ) : (
+                      <span>End time</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-4">
+                  <TimePicker
+                    date={endTime}
+                    setDate={(date) => {
+                      if (date !== undefined) setEndTime(date)
+                    }}
+                    showSeconds={false}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+        </div>
+
         <div className="space-y-4">
           {exercises.map((exercise, index) => (
             <ExerciseCard
