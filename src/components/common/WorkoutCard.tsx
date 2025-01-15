@@ -1,5 +1,6 @@
 import { useState } from "react"
-import * as moment from "moment"
+import { getMaxSetVolume } from "@/lib/utils"
+import Moment from "react-moment"
 import { ChevronsUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -19,20 +20,20 @@ import { Separator } from "@/components/ui/separator"
 
 import type { Exercise } from "@/types/workout"
 
-interface ExerciseCardProps {
+interface ExerciseRowProps {
   exercise: Exercise
 }
 
-const ExerciseCard = ({ exercise }: ExerciseCardProps) => {
+const ExerciseRow = ({ exercise }: ExerciseRowProps) => {
   return (
     <div className="rounded-md border px-3 py-3 text-sm mb-1 flex justify-between">
       <h2>{exercise.name}</h2>
-      <h2>---</h2>
+      <h2>{getMaxSetVolume(exercise)}</h2>
     </div>
   )
 }
 
-interface PostCardProps {
+interface WorkoutCardProps {
   username: string
   profilePic?: string
   title: string
@@ -40,10 +41,10 @@ interface PostCardProps {
   date: Date
   durationInMinutes: number
   volume: number
-  exercises: [Exercise, ...Exercise[]]
+  exercises: Exercise[]
 }
 
-const PostCard = ({ ...props }: PostCardProps) => {
+const WorkoutCard = ({ ...props }: WorkoutCardProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false)
 
   let durationString
@@ -56,6 +57,14 @@ const PostCard = ({ ...props }: PostCardProps) => {
     } else {
       durationString = hours + " hours"
     }
+  }
+
+  let volumeString
+  if (props.volume < 1000) {
+    volumeString = props.volume.toString()
+  } else {
+    const volumeApprox = Math.round((props.volume / 1000) * 10) / 10
+    volumeString = volumeApprox + "k"
   }
 
   return (
@@ -78,7 +87,7 @@ const PostCard = ({ ...props }: PostCardProps) => {
         <div className="flex justify-between items-center gap-6 px-2 mb-6">
           <div className="flex flex-col">
             <h2 className="font-bold">Date</h2>
-            <p>{moment(props.date).format("M/D/Y")}</p>
+            <Moment format="M/D/YY">{props.date}</Moment>
           </div>
           <div className="flex flex-col">
             <h2 className="font-bold">Duration</h2>
@@ -86,7 +95,7 @@ const PostCard = ({ ...props }: PostCardProps) => {
           </div>
           <div className="flex flex-col">
             <h2 className="font-bold">Volume</h2>
-            <p>{props.volume.toLocaleString()} lbs</p>
+            <p>{volumeString} lbs</p>
           </div>
         </div>
 
@@ -95,14 +104,14 @@ const PostCard = ({ ...props }: PostCardProps) => {
           <h1 className="font-bold">Best Set</h1>
         </div>
         {/* Todo: Calculate best set */}
-        <ExerciseCard exercise={props.exercises[0]} />
+        <ExerciseRow exercise={props.exercises[0]} />
 
         {props.exercises.length > 1 && (
           <Collapsible open={isOpen} onOpenChange={setIsOpen}>
             <CollapsibleContent>
               <div className="flex flex-col mb-1">
                 {props.exercises.slice(1).map((exercise, key) => (
-                  <ExerciseCard exercise={exercise} key={key} />
+                  <ExerciseRow exercise={exercise} key={key} />
                 ))}
               </div>
             </CollapsibleContent>
@@ -121,4 +130,4 @@ const PostCard = ({ ...props }: PostCardProps) => {
   )
 }
 
-export default PostCard
+export default WorkoutCard

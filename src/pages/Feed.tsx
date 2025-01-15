@@ -1,8 +1,8 @@
-import PostCard from "@/components/Feed/PostCard"
+import WorkoutCard from "@/components/common/WorkoutCard"
 
 const Feed = () => {
   return (
-    <PostCard
+    <WorkoutCard
       username="Chip"
       title="Great workout today"
       caption="I can't walk anymore"

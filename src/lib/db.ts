@@ -33,14 +33,14 @@ export const addUser = async (user: FirebaseUser) => {
 export const addWorkout = async (userId: string, workout: WorkoutLog) => {
   const workoutId = uuidv4()
 
-  const workoutData: Workout = {
+  const workoutData = {
     workoutId,
     userId: userId,
     title: workout.title || "",
     caption: workout.caption || "",
-    date: workout.date,
-    startTime: workout.startTime,
-    endTime: workout.endTime,
+    date: workout.date.getTime(),
+    startTime: workout.startTime.getTime(),
+    endTime: workout.endTime.getTime(),
     exercises: workout.exercises,
   }
 
@@ -84,11 +84,16 @@ export const getUser = async (userId: string): Promise<User | null> => {
 
 export const getWorkout = async (workoutId: string) => {
   try {
-    const workoutRef = ref(database, `users/${workoutId}`)
+    const workoutRef = ref(database, `workouts/${workoutId}`)
     const snapshot = await get(workoutRef)
 
     if (snapshot.exists()) {
       const workoutData = snapshot.val()
+      if (workoutData) {
+        workoutData.date = new Date(workoutData.date)
+        workoutData.startTime = new Date(workoutData.startTime)
+        workoutData.endTime = new Date(workoutData.endTime)
+      }
       return workoutData as Workout
     } else {
       console.log(`Could not find workout with id ${workoutId}`)
@@ -100,5 +105,39 @@ export const getWorkout = async (workoutId: string) => {
       err
     )
     return {}
+  }
+}
+
+export const getAllUserWorkouts = async (
+  userId: string
+): Promise<Workout[] | null> => {
+  try {
+    const user = await getUser(userId)
+    if (!user) {
+      console.error(`User with id ${userId} does not exist.`)
+      return null
+    }
+
+    const workoutIds = user.workouts || []
+    if (workoutIds.length === 0) {
+      console.log(`No workouts found for user ${userId}.`)
+      return []
+    }
+
+    const workoutPromises = workoutIds.map((workoutId) => getWorkout(workoutId))
+    const workouts = await Promise.all(workoutPromises)
+
+    const validWorkouts = workouts.filter(
+      (workout): workout is Workout =>
+        workout && Object.keys(workout).length > 0
+    )
+
+    return validWorkouts
+  } catch (error) {
+    console.error(
+      `An error occurred while fetching workouts for user ${userId}:`,
+      error
+    )
+    return null
   }
 }
