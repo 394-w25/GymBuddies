@@ -29,6 +29,16 @@ export const addUser = async (user: FirebaseUser) => {
   }
 }
 
+export const updateUserStatus = async (userId : string, status: boolean) => {
+    try {
+      await update(ref(database, `users/${userId}`), {status : status});
+      return true;
+    } catch (err) {
+      console.log(`failed to update user ${userId}`, err);
+      return false;
+    }
+}
+
 export const addWorkout = async (userId: string, workout: WorkoutLog) => {
   const workoutId = uuidv4()
 
@@ -57,11 +67,50 @@ export const addWorkout = async (userId: string, workout: WorkoutLog) => {
 
     console.log(`Workout ${workoutId} added for user ${userId}`)
 
-    return true
+    return workoutId;
   } catch (error) {
     console.log("Error adding workout:", error)
     return false
   }
+}
+
+export const updateWorkout = async (userId : string, workoutId : string, workout : WorkoutLog) => {
+
+
+  if (workout.endTime) {
+    const workoutData: Workout = {
+      workoutId,
+      userId: userId,
+      title: workout.title,
+      caption: workout.caption,
+      date: workout.date,
+      startTime: workout.startTime,
+      endTime: workout.endTime,
+      exercises: workout.exercises,
+    }
+
+    try {
+      await set(ref(database, `workouts/${workoutId}`), workoutData);
+      return true;
+
+    } catch (err) {
+      console.log(`could not update finalized workout : `, err);
+      return false;
+    }
+
+  } else {
+    try {
+      await update(ref(database, `workouts/${workoutId}`), workout);
+      return true;
+
+    } catch (err) {
+      console.log(`could not update workout : `, err);
+      return false;
+    }
+  }
+
+  
+
 }
 
 export const getUser = async (userId: string) => {
@@ -83,7 +132,7 @@ export const getUser = async (userId: string) => {
 
 export const getWorkout = async (workoutId: string) => {
   try {
-    const workoutRef = ref(database, `users/${workoutId}`)
+    const workoutRef = ref(database, `workouts/${workoutId}`)
     const snapshot = await get(workoutRef)
 
     if (snapshot.exists()) {
@@ -101,3 +150,4 @@ export const getWorkout = async (workoutId: string) => {
     return {}
   }
 }
+

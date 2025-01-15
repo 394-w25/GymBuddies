@@ -1,33 +1,165 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { WorkoutLogModal } from "@/components/ExerciseTracker/LogModal"
-import type { WorkoutLog } from "@/types/workout"
+import type { Exercise, Workout, WorkoutLog } from "@/types/workout"
+import { useAppContext } from "@/context/AppContext"
+import { updateUserStatus } from "@/lib/db"
+import { addWorkout, updateWorkout } from "@/lib/db"
+
 // import { addUser, addWorkout, getUser } from "@/lib/dbManage"
+
+/* 
+
+its 2:30 and i'm sleepy so here goes:
+
+the goal here is to have 'start workout' initiate a workout, all additions of exercises push to the
+db immediately, as updates, end workout finalizes the workout and notifies friends (tho they can see
+  the unfinished workout the whole time, i.e. we don;t have to filter in the feed)
+
+i had to update some of the type restrictions on workouts to do so, but the setter funcs don't like 
+things being set to undefined, so the push for starting an unfinished workout isn't working perfectly rn
+
+i have not integrated compatibility for the log modal, but that'll be pretty easy
+
+i can do all of the above unfinished tasks -- if you're reading this, feel free to work on something else
+
+we are still getting some warnings on the context because it thinks theres a chance the null values
+will never be updated (but they will as long as a usr doesn't just sit at the to-be-implemented login screen)
+
+*/
 
 const ExerciseTracker = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
 
+  const [currentWorkout, setCurrentWorkout] = useState<WorkoutLog>(
+    { // empty dummy values because i don't know how i should handle typing....
+      date : new Date(),
+      startTime : new Date,
+      exercises : [
+        {
+          name : '',
+          sets : []
+        }
+      ]
+    }
+  )
+  const {status, setStatus, userId, workoutId, setWorkoutId} = useAppContext();
+
+  const updateStatus = (userId : string, newStatus : boolean) => { // stupid to even take in newStatus
+    updateUserStatus(userId, newStatus);
+    if (newStatus) {
+      // newStatus === true means we MUST BE starting a NEW workout
+      // this means we need to ADD an in-progress workout
+
+      const newWorkout: WorkoutLog = {
+        date : new Date(),
+        startTime : new Date(),
+        exercises : [{name : '', sets : []}]
+      }
+
+      addWorkout(userId, newWorkout).then((returnVal) => {
+        if (!returnVal) {
+          // failure to add workout
+          console.log("FAILED TO ADD WORKOUT!");
+        } else {
+          setWorkoutId(returnVal);
+
+        }
+      })
+
+    } else {
+      // newStatus === false means we MUST be ENDING our CURRENT workout
+      // this means we need to update workout one final time
+      updateCurrentWorkoutRemote();
+
+    }
+    setStatus(newStatus);
+  }
+
+  const updateCurrentWorkoutRemote = () => {
+    if (userId && workoutId) {
+      updateWorkout(userId, workoutId, currentWorkout);
+    }
+  }
+
+  const appendExerciseToCurrentWorkout = (newExercise : Exercise) => {
+    if (JSON.stringify(currentWorkout.exercises) === JSON.stringify([{name : '', sets : []}])) {
+      setCurrentWorkout({...currentWorkout, exercises : [newExercise]});
+    } else {
+      setCurrentWorkout({...currentWorkout, exercises : [...currentWorkout.exercises, newExercise]});
+    }
+
+
+  }
+
+
+
   const handleSaveWorkout = (workout: WorkoutLog) => {
     // Todo: Zero out seconds
-    console.log(workout)
+    console.log(workout);
+
+
   }
 
   return (
     <div className="container mx-auto">
       <h1 className="text-6xl font-bold mb-6">Tracker</h1>
-      <Button
-        size="lg"
-        className="w-full mb-4"
-        onClick={() => setIsModalOpen(true)}
-      >
-        + Log Workout
-      </Button>
+
+      {
+        !userId
+        &&
+        <Button
+          size='lg'
+          className="w-1/2"
+          onClick={() => console.log("figure out login at some point ;)")}
+          >
+            Log In!
+          </Button>
+      }
+
+      {
+        !status && userId
+        && 
+        <Button
+          size='lg'
+          className="w-1/2 mb-4"
+          onClick={() => updateStatus(userId, true)}
+        >
+          + Start Workout!
+        </Button>
+      }
+
+      {
+        status && userId
+        
+        &&
+        <div className="workout-management-buttons flex flex-col gap-2 items-center">
+          <Button
+            size="lg"
+            className="w-full"
+            onClick={() => updateStatus(userId, false)}
+          >
+            End Workout
+          </Button>
+
+          <Button
+            size="lg"
+            className="w-full mb-4"
+            onClick={() => setIsModalOpen(true)}
+          >
+            + Log Workout
+          </Button>
+        </div>
+      }
+
 
       <WorkoutLogModal
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
         onSave={handleSaveWorkout}
       />
+
+
     </div>
   )
 }

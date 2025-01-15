@@ -15,7 +15,7 @@ export interface WorkoutLog {
   caption?: string
   date: Date
   startTime: Date
-  endTime: Date
+  endTime?: Date
   exercises: [Exercise, ...Exercise[]]
 }
 
