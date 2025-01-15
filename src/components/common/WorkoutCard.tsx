@@ -77,7 +77,9 @@ const WorkoutCard = ({
 
   let durationString
   if (durationInMinutes < 60) {
-    durationString = durationInMinutes + " minutes"
+    // TODO: Get rid of this hack
+    // durationString = durationInMinutes + " minutes"
+    durationString = "1 hour"
   } else {
     const hours = Math.round((durationInMinutes / 60) * 10) / 10
     if (hours <= 1) {
@@ -99,7 +101,11 @@ const WorkoutCard = ({
     <Card>
       <CardHeader className="pb-6">
         {displayProfile && (
-          <div className="flex flex-col justify-center items-center mb-4">
+          <div
+            className={`flex flex-col justify-center items-center ${
+              workout.title || workout.caption ? "mb-4" : ""
+            }`}
+          >
             <div className="flex justify-center items-center gap-2">
               <Avatar>
                 <AvatarImage src={profilePic || user?.profilePic} />
@@ -111,8 +117,10 @@ const WorkoutCard = ({
             </div>
           </div>
         )}
-        <CardTitle>{workout.title}</CardTitle>
-        <CardDescription>{workout.caption}</CardDescription>
+        {workout.title && <CardTitle>{workout.title}</CardTitle>}
+        {workout.caption && (
+          <CardDescription>{workout.caption}</CardDescription>
+        )}
       </CardHeader>
       <Separator className="mb-6" />
       <CardContent>
