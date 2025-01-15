@@ -1,9 +1,5 @@
 import { useEffect, useState } from "react"
 import { addWorkout, getAllUserWorkouts } from "@/lib/db"
-import {
-  calculateMinutesBetweenDates,
-  calculateWorkoutVolume,
-} from "@/lib/utils"
 import { useUser } from "@/components/Layout/UserContext"
 import { Button } from "@/components/ui/button"
 import { WorkoutLogModal } from "@/components/ExerciseTracker/WorkoutInput"
@@ -54,22 +50,15 @@ const ExerciseTracker = () => {
         onSave={handleSaveWorkout}
       />
 
-      {/* // Todo: Simplify props, only have to pass in workout here */}
       {user && (
         <div className="flex flex-col gap-4">
           {userWorkouts?.map((workout, key) => (
             <WorkoutCard
               key={key}
+              userId={workout.userId}
+              workout={workout}
               username={user.name}
-              title={workout.title}
-              caption={workout.caption}
-              date={workout.date}
-              durationInMinutes={calculateMinutesBetweenDates(
-                workout.startTime,
-                workout.endTime
-              )}
-              volume={calculateWorkoutVolume(workout.exercises)}
-              exercises={workout.exercises}
+              profilePic={user.profilePic}
             />
           ))}
         </div>
