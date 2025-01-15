@@ -2,7 +2,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { WorkoutLogModal } from "@/components/ExerciseTracker/LogModal"
 import type { WorkoutLog } from "@/types/workout"
-import { addUser, addWorkout, readUser } from "@/dbManage"
+import { addUser, addWorkout, readUser } from "@/lib/dbManage"
 
 /**
  * 
@@ -28,15 +28,14 @@ const ExerciseTracker = () => {
   }
 
   const dummyUser = {
-    name : 'Theo Maurino',
-    profile_pic : "/images/theo.png",
-    email : "thjmaurino@gmail.com",
-    friends : [],
-    status : 1,
-    bio : "My name is Theo, and I love to hit the gym!",
-    streak : 999999,
-    workouts : []
-
+    name: "Theo Maurino",
+    profile_pic: "/images/theo.png",
+    email: "thjmaurino@gmail.com",
+    friends: [],
+    status: 1,
+    bio: "My name is Theo, and I love to hit the gym!",
+    streak: 999999,
+    workouts: [],
   }
 
   const dummyWorkout = [
@@ -100,17 +99,31 @@ const ExerciseTracker = () => {
       num_reps: 15,
       weight: 200,
     },
-  ];
+  ]
 
   const addTheo = () => {
-    addUser(dummyUser.name, dummyUser.profile_pic, dummyUser.email, dummyUser.friends, dummyUser.status, dummyUser.bio, dummyUser.streak, dummyUser.workouts);
+    addUser(
+      dummyUser.name,
+      dummyUser.profile_pic,
+      dummyUser.email,
+      dummyUser.friends,
+      dummyUser.status,
+      dummyUser.bio,
+      dummyUser.streak,
+      dummyUser.workouts
+    )
   }
 
   const addTheoWorkout = () => {
-    addWorkout('cad47c30-f0b7-49cb-bbc5-dedb7232f210', Date(), Date(), dummyWorkout);
+    addWorkout(
+      "cad47c30-f0b7-49cb-bbc5-dedb7232f210",
+      Date(),
+      Date(),
+      dummyWorkout
+    )
   }
 
-  readUser('cad47c30-f0b7-49cb-bbc5-dedb7232f210');
+  readUser("cad47c30-f0b7-49cb-bbc5-dedb7232f210")
 
   return (
     <div className="container mx-auto">
@@ -133,7 +146,10 @@ const ExerciseTracker = () => {
         CLICK ME
       </div>
 
-      <div className="button-container mt-10 bg-gray-300" onClick={addTheoWorkout}>
+      <div
+        className="button-container mt-10 bg-gray-300"
+        onClick={addTheoWorkout}
+      >
         CLICK ME TO ADD WORKOUT FOR THEO
       </div>
     </div>
