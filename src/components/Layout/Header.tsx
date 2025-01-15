@@ -1,4 +1,5 @@
 import { useUser } from "./UserContext"
+import { useNavigate } from "react-router"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -6,11 +7,23 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "../ui/dropdown-menu"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { LogOut } from "lucide-react"
 
 const Header = () => {
   const { user, handleSignIn, handleSignOut } = useUser()
+  const navigate = useNavigate()
 
   return (
     <header className="flex justify-between items-center p-4 bg-white shadow-sm sticky top-0 z-50">
@@ -28,10 +41,33 @@ const Header = () => {
             </Avatar>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem onClick={handleSignOut}>
-              <LogOut />
-              <span>Log out</span>
-            </DropdownMenuItem>
+            <AlertDialog>
+              <AlertDialogTrigger>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                  <LogOut />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Sign Out</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to sign out?
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={async () => {
+                      await handleSignOut()
+                      navigate("/")
+                    }}
+                  >
+                    Sign Out
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </DropdownMenuContent>
         </DropdownMenu>
       )}
