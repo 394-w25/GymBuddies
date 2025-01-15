@@ -26,7 +26,7 @@ const Header = () => {
   const navigate = useNavigate()
 
   return (
-    <header className="flex justify-between items-center p-4 bg-white shadow-sm sticky top-0 z-50">
+    <header className="flex justify-between items-center py-4 px-6 bg-white shadow-sm sticky top-0 z-50">
       <h1 className="text-2xl font-bold text-primary">GymBuddies</h1>
       {!user ? (
         <Button onClick={handleSignIn}>Login</Button>

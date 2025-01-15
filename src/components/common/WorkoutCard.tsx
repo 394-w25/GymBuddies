@@ -44,6 +44,7 @@ interface WorkoutCardProps {
   workout: Workout
   username?: string
   profilePic?: string
+  displayProfile?: boolean
 }
 
 const WorkoutCard = ({
@@ -51,6 +52,7 @@ const WorkoutCard = ({
   workout,
   username,
   profilePic,
+  displayProfile = true,
 }: WorkoutCardProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [user, setUser] = useState<User | null>()
@@ -96,17 +98,19 @@ const WorkoutCard = ({
   return (
     <Card>
       <CardHeader className="pb-6">
-        <div className="flex flex-col justify-center items-center mb-4">
-          <div className="flex justify-center items-center gap-2">
-            <Avatar>
-              <AvatarImage src={profilePic || user?.profilePic} />
-              <AvatarFallback>
-                {username?.at(0) || user?.name.at(0)}
-              </AvatarFallback>
-            </Avatar>
-            <h1 className="font-bold text-xl">{username || user?.name}</h1>
+        {displayProfile && (
+          <div className="flex flex-col justify-center items-center mb-4">
+            <div className="flex justify-center items-center gap-2">
+              <Avatar>
+                <AvatarImage src={profilePic || user?.profilePic} />
+                <AvatarFallback>
+                  {username?.at(0) || user?.name.at(0)}
+                </AvatarFallback>
+              </Avatar>
+              <h1 className="font-bold text-xl">{username || user?.name}</h1>
+            </div>
           </div>
-        </div>
+        )}
         <CardTitle>{workout.title}</CardTitle>
         <CardDescription>{workout.caption}</CardDescription>
       </CardHeader>
