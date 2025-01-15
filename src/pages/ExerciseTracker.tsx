@@ -28,6 +28,18 @@ will never be updated (but they will as long as a usr doesn't just sit at the to
 
 */
 
+/*
+
+TM TODOS
+
+0. ADD FRIEND FUNCTION
+1. REMOVE TIME FROM LOG MODAL
+2. HAVE SAVE ON LOG MODAL UPDATE STATE IN EXERCISE TRACKER
+3. HAVE SAVE ON LOG MODAL PUSH TO DB
+4. HAVE HOME UPDATE EVERY 20 SECONDS
+
+*/
+
 const ExerciseTracker = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
 

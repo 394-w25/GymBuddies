@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from "uuid"
 import type { User } from "@/types/user"
 import type { User as FirebaseUser } from "firebase/auth"
 import type { Workout, WorkoutLog } from "@/types/workout"
+import { deepEqual, deepStrictEqual } from "assert"
 
 export const addUser = async (user: FirebaseUser) => {
   const { uid, photoURL, displayName } = user
@@ -113,7 +114,7 @@ export const updateWorkout = async (userId : string, workoutId : string, workout
 
 }
 
-export const getUser = async (userId: string) => {
+export const getUser = async (userId: string)  => {
   try {
     const userRef = ref(database, `users/${userId}`)
     const snapshot = await get(userRef)
@@ -151,3 +152,38 @@ export const getWorkout = async (workoutId: string) => {
   }
 }
 
+
+export const addFriend = async (userId :string, friendId: string) => {
+
+  //add friend's id to user friend list
+  get(ref(database, `users/${userId}`)).then((data) => {
+    if (!data.exists()) {
+      // no data, no pass
+      throw new Error("Failed to fetch user from database :(");
+    }
+    const currUser = data.val();
+    update(ref(database, `users/${userId}`), {friends : ((currUser.friends !== undefined) ? [...currUser.friends, friendId] : [friendId] ) })
+  }).catch((err) => {
+    console.log(`error ocurred while trying to look up user ${userId}`, err);
+    return false;
+  }) 
+
+  // right now just force both people to be friends
+
+  get(ref(database, `users/${friendId}`)).then((data) => {
+    if(!data.exists()) {
+      throw new Error("Failed to fetch friend from db :(");
+    } else {
+      const currFriend = data.val();
+      update(ref(database, `users/${friendId}`), {friends : ((currFriend.friends !== undefined) ? [...currFriend.friends, userId] : [userId] ) })
+
+    }
+  }).catch((err) => {
+    console.log(`Could not complete friend add, likely could not find friend with friend id ${friendId}`, err);
+    return false;
+  });
+
+
+  return true;
+
+}
