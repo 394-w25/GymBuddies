@@ -2,20 +2,16 @@ import { database } from "@/lib/firebase"
 import { get, ref, set, update } from "firebase/database"
 import { v4 as uuidv4 } from "uuid"
 import type { User } from "@/types/user"
+import type { User as FirebaseUser } from "firebase/auth"
 import type { Workout, WorkoutLog } from "@/types/workout"
 
-export const addUser = async (
-  name: string,
-  email: string,
-  profilePic: string
-) => {
-  const userId = uuidv4()
+export const addUser = async (user: FirebaseUser) => {
+  const { uid, photoURL, displayName } = user
 
   const userData: User = {
-    userId,
-    name: name,
-    profilePic: profilePic,
-    email: email,
+    userId: uid,
+    name: displayName || "",
+    profilePic: photoURL || "",
     friends: [],
     status: "",
     bio: "",
@@ -23,9 +19,14 @@ export const addUser = async (
     workouts: [],
   }
 
-  await set(ref(database, `users/${userId}`), userData)
-
-  console.log(`User added! ${userId}`)
+  try {
+    await set(ref(database, `users/${uid}`), userData)
+    console.log(`User added! ${uid}`)
+    return true
+  } catch (error) {
+    console.log("Error creating user:", error)
+    return false
+  }
 }
 
 export const addWorkout = async (userId: string, workout: WorkoutLog) => {
@@ -43,9 +44,7 @@ export const addWorkout = async (userId: string, workout: WorkoutLog) => {
   }
 
   try {
-    const workoutRef = ref(database, `workouts/${workoutId}`)
-
-    await set(workoutRef, workoutData)
+    await set(ref(database, `workouts/${workoutId}`), workoutData)
 
     // Update workouts array for user
     const userRef = ref(database, `users/${userId}/workouts`)
@@ -57,8 +56,11 @@ export const addWorkout = async (userId: string, workout: WorkoutLog) => {
     await update(ref(database, `users/${userId}`), { workouts: userWorkouts })
 
     console.log(`Workout ${workoutId} added for user ${userId}`)
+
+    return true
   } catch (error) {
     console.log("Error adding workout:", error)
+    return false
   }
 }
 
@@ -74,7 +76,7 @@ export const getUser = async (userId: string) => {
       return {}
     }
   } catch (err) {
-    console.log(`An error occurred while trying to get user ${userId}`, err)
+    console.log(`An error occurred while trying to get user ${userId}:`, err)
     return {}
   }
 }
@@ -93,7 +95,7 @@ export const getWorkout = async (workoutId: string) => {
     }
   } catch (err) {
     console.log(
-      `An error occurred while trying to get workout ${workoutId}`,
+      `An error occurred while trying to get workout ${workoutId}:`,
       err
     )
     return {}

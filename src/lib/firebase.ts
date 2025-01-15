@@ -1,7 +1,6 @@
 import { initializeApp } from "firebase/app"
 import { getDatabase } from "firebase/database"
-
-console.log(import.meta.env.VITE_FIREBASE_DATABASE_URL)
+import { getAuth } from "firebase/auth"
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -13,10 +12,11 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 }
 
-console.log(`firebase Config, `, firebaseConfig)
-
 // Initialize Firebase
 const app = initializeApp(firebaseConfig)
 
 // Initialize Realtime Database
 export const database = getDatabase(app)
+
+// Initialize Authentication
+export const auth = getAuth(app)

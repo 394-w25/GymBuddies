@@ -1,7 +1,6 @@
 export interface User {
   userId: string
   name: string
-  email: string
   profilePic: string
   friends: string[]
   status: string
