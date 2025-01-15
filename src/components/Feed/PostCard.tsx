@@ -1,5 +1,5 @@
 import { useState } from "react"
-import moment from "moment"
+import * as moment from "moment"
 import { ChevronsUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {

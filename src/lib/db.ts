@@ -36,8 +36,8 @@ export const addWorkout = async (userId: string, workout: WorkoutLog) => {
   const workoutData: Workout = {
     workoutId,
     userId: userId,
-    title: workout.title,
-    caption: workout.caption,
+    title: workout.title || "",
+    caption: workout.caption || "",
     date: workout.date,
     startTime: workout.startTime,
     endTime: workout.endTime,
