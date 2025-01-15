@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useUser } from "@/components/Layout/UserContext"
 import { Button } from "@/components/ui/button"
-import { WorkoutLogModal } from "@/components/ExerciseTracker/LogModal"
+import { WorkoutLogModal } from "@/components/ExerciseTracker/WorkoutInput"
 import type { WorkoutLog } from "@/types/workout"
 import { addWorkout } from "@/lib/db"
 

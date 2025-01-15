@@ -17,7 +17,7 @@ import {
 import { format } from "date-fns"
 import { CalendarIcon, Clock } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { ExerciseCard } from "./ExerciseCard"
+import { ExerciseCard } from "./ExerciseInput"
 import { TimePicker } from "../ui/time-picker"
 import type { Exercise, WorkoutLog } from "@/types/workout"
 
