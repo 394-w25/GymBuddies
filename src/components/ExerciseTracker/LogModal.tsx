@@ -1,11 +1,13 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { Input } from "../ui/input"
 import { Calendar } from "@/components/ui/calendar"
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
+  SheetDescription,
 } from "@/components/ui/sheet"
 import {
   Popover,
@@ -32,7 +34,9 @@ export function WorkoutLogModal({
 }: WorkoutLogModalProps) {
   const [exercises, setExercises] = useState<Exercise[]>([])
 
-  // Needs input validation (future dates only, startTime must be before endTime)
+  // Needs input validation (future dates only, startTime must be before endTime, prevent empty logs)
+  const [title, setTitle] = useState<string>("")
+  const [caption, setCaption] = useState<string>("")
   const [date, setDate] = useState<Date>(new Date())
   const [startTime, setStartTime] = useState<Date>(new Date())
   const [endTime, setEndTime] = useState<Date>(new Date())
@@ -57,22 +61,26 @@ export function WorkoutLogModal({
     )
   }
 
+  const resetModal = () => {
+    onOpenChange(false)
+    setDate(new Date())
+    setStartTime(new Date())
+    setEndTime(new Date())
+    setExercises([])
+    setTitle("")
+    setCaption("")
+  }
+
   const handleSave = () => {
     onSave({
       date,
       startTime,
       endTime,
       exercises,
+      title,
+      caption,
     })
-    onOpenChange(false)
-    setDate(new Date())
-    setStartTime(new Date())
-    setEndTime(new Date())
-  }
-
-  const onClose = () => {
-    onOpenChange(false)
-    setExercises([])
+    resetModal()
   }
 
   return (
@@ -83,12 +91,30 @@ export function WorkoutLogModal({
         showDefaultCloseButton={false}
       >
         <SheetHeader className="flex-row items-center justify-between space-y-0 pb-4">
-          <Button variant="outline" onClick={onClose}>
+          <SheetDescription className="hidden">
+            Add a new workout
+          </SheetDescription>
+          <Button variant="outline" onClick={resetModal}>
             Cancel
           </Button>
           <SheetTitle>Workout Log</SheetTitle>
           <Button onClick={handleSave}>Save</Button>
         </SheetHeader>
+
+        <div className="flex flex-col gap-2">
+          <Input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Title"
+            className="text-3xl font-semibold border-none bg-transparent h-auto p-0 focus-visible:ring-0"
+          />
+          <Input
+            value={caption}
+            onChange={(e) => setCaption(e.target.value)}
+            placeholder="Caption"
+            className="text-sm font-semibold border-none bg-transparent h-auto p-0 focus-visible:ring-0"
+          />
+        </div>
 
         <div className="space-y-4 py-4">
           <div className="flex flex-col gap-2">

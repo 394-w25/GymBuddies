@@ -11,12 +11,12 @@ export interface Exercise {
 
 // Todo: Get rid of date
 export interface WorkoutLog {
-  title?: string
-  caption?: string
+  title: string
+  caption: string
   date: Date
   startTime: Date
   endTime: Date
-  exercises: [Exercise, ...Exercise[]]
+  exercises: Exercise[]
 }
 
 export interface Workout extends WorkoutLog {
