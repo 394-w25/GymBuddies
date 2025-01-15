@@ -3,7 +3,7 @@ export interface User {
   name: string
   profilePic: string
   friends?: string[]
-  status: string
+  status: boolean
   bio: string
   streak: number
   workouts?: string[]

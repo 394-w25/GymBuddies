@@ -1,10 +1,12 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { WorkoutLogModal } from "@/components/ExerciseTracker/LogModal"
 import type { Exercise, Workout, WorkoutLog } from "@/types/workout"
 import { useAppContext } from "@/context/AppContext"
-import { updateUserStatus } from "@/lib/db"
+import { addFriend, addUser, updateUserStatus } from "@/lib/db"
 import { addWorkout, updateWorkout } from "@/lib/db"
+// import { User } from "@/types/user"
+import type {User as FirebaseUser} from "firebase/auth"
 
 // import { addUser, addWorkout, getUser } from "@/lib/dbManage"
 
@@ -32,7 +34,7 @@ will never be updated (but they will as long as a usr doesn't just sit at the to
 
 TM TODOS
 
-0. ADD FRIEND FUNCTION
+0. ADD FRIEND FUNCTION ------ DONE
 1. REMOVE TIME FROM LOG MODAL
 2. HAVE SAVE ON LOG MODAL UPDATE STATE IN EXERCISE TRACKER
 3. HAVE SAVE ON LOG MODAL PUSH TO DB
@@ -112,6 +114,107 @@ const ExerciseTracker = () => {
 
 
   }
+
+  // useEffect(() => {
+  //   // addFriend(userId, '')
+  //   // if (userId) {
+  //   //   // addFriend(userId, 'XMsDS6uCgceKHjB84PuapyaTHJ3'); // tm friend id
+  //   // }
+  //   const startTime = new Date();
+  //   const endTime = new Date();
+
+  //   endTime.setHours(startTime.getHours() + 1)
+
+  //   // give theo some a workout
+  //   const tmWkt : WorkoutLog = {
+  //     date : new Date(),
+  //     startTime : startTime,
+  //     endTime : endTime,
+  //     title : "My first workout",
+  //     caption : "That was hard!",
+  //     exercises : [
+  //       {
+  //         name : "Curl",
+  //         sets : [
+  //           {
+  //             number : 1,
+  //             weight : 10,
+  //             reps : 5
+  //           },
+  //           {
+  //             number : 2,
+  //             weight : 15,
+  //             reps : 4
+  //           },
+  //           {
+  //             number : 3,
+  //             weight : 20,
+  //             reps : 4
+  //           },
+  //           {
+  //             number : 4,
+  //             weight : 30,
+  //             reps : 4
+  //           },
+  //         ]
+  //       },
+  //       {
+  //         name : "Bench Press",
+  //         sets : [
+  //           {
+  //             number : 1,
+  //             weight : 10,
+  //             reps : 5
+  //           },
+  //           {
+  //             number : 2,
+  //             weight : 15,
+  //             reps : 4
+  //           },
+  //           {
+  //             number : 3,
+  //             weight : 20,
+  //             reps : 4
+  //           },
+  //           {
+  //             number : 4,
+  //             weight : 30,
+  //             reps : 4
+  //           },
+  //         ]
+  //       },
+  //       {
+  //         name : "Weighted Pull Up",
+  //         sets : [
+  //           {
+  //             number : 1,
+  //             weight : 10,
+  //             reps : 5
+  //           },
+  //           {
+  //             number : 2,
+  //             weight : 15,
+  //             reps : 4
+  //           },
+  //           {
+  //             number : 3,
+  //             weight : 20,
+  //             reps : 4
+  //           },
+  //           {
+  //             number : 4,
+  //             weight : 30,
+  //             reps : 4
+  //           },
+  //         ]
+  //       }
+  //     ]
+
+
+  //   }
+  //   addWorkout("XMsDS6uCgceKHjB84PuapyaTHJ3", tmWkt)
+  // }, [])
+  
 
   return (
     <div className="container mx-auto">

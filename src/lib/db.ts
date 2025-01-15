@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from "uuid"
 import type { User } from "@/types/user"
 import type { User as FirebaseUser } from "firebase/auth"
 import type { Workout, WorkoutLog } from "@/types/workout"
-import { deepEqual, deepStrictEqual } from "assert"
+// import { deepEqual, deepStrictEqual } from "assert"
 
 export const addUser = async (user: FirebaseUser) => {
   const { uid, photoURL, displayName } = user
@@ -14,7 +14,7 @@ export const addUser = async (user: FirebaseUser) => {
     name: displayName || "",
     profilePic: photoURL || "",
     friends: [],
-    status: "",
+    status: false,
     bio: "",
     streak: 0,
     workouts: [],
@@ -183,7 +183,7 @@ export const addFriend = async (userId :string, friendId: string) => {
     return false;
   });
 
-
+  console.log(`successfully linked friends ${userId} and ${friendId}`);
   return true;
 
 }
