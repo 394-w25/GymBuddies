@@ -90,9 +90,11 @@ export const getWorkout = async (workoutId: string) => {
     if (snapshot.exists()) {
       const workoutData = snapshot.val()
       if (workoutData) {
-        workoutData.date = new Date(workoutData.date)
-        workoutData.startTime = new Date(workoutData.startTime)
-        workoutData.endTime = new Date(workoutData.endTime)
+        if (workoutData.date) workoutData.date = new Date(workoutData.date)
+        if (workoutData.startTime)
+          workoutData.startTime = new Date(workoutData.startTime)
+        if (workoutData.endTime)
+          workoutData.endTime = new Date(workoutData.endTime)
       }
       return workoutData as Workout
     } else {
@@ -139,5 +141,37 @@ export const getAllUserWorkouts = async (
       error
     )
     return null
+  }
+}
+
+export const getAllWorkouts = async (): Promise<Workout[]> => {
+  try {
+    const workoutsRef = ref(database, `workouts`)
+    const snapshot = await get(workoutsRef)
+
+    if (snapshot.exists()) {
+      const workoutsData = snapshot.val()
+
+      // Transform the workouts object into an array and convert timestamps
+      const workouts: Workout[] = Object.values(workoutsData).map((workout) => {
+        const typedWorkout = workout as Workout
+
+        if (typedWorkout.date) typedWorkout.date = new Date(typedWorkout.date)
+        if (typedWorkout.startTime)
+          typedWorkout.startTime = new Date(typedWorkout.startTime)
+        if (typedWorkout.endTime)
+          typedWorkout.endTime = new Date(typedWorkout.endTime)
+
+        return typedWorkout
+      })
+
+      return workouts
+    } else {
+      console.log(`No workouts found in the database.`)
+      return []
+    }
+  } catch (err) {
+    console.error(`An error occurred while fetching all workouts:`, err)
+    return []
   }
 }

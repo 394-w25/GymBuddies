@@ -28,7 +28,7 @@ export const calculateWorkoutVolume = (workout: Exercise[]): number => {
   return totalVolume
 }
 
-export const getMaxSetVolume = (exercise: Exercise): string => {
+export const getBestSet = (exercise: Exercise): string => {
   if (!exercise.sets || exercise.sets.length === 0) {
     console.error("The exercise has no sets.")
     return "---"
