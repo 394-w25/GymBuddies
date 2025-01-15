@@ -19,7 +19,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { LogOut } from "lucide-react"
+import { LogOut, Dumbbell } from "lucide-react"
 
 const Header = () => {
   const { user, handleSignIn, handleSignOut } = useUser()
@@ -27,7 +27,10 @@ const Header = () => {
 
   return (
     <header className="flex justify-between items-center py-4 px-6 bg-white shadow-sm sticky top-0 z-50">
-      <h1 className="text-2xl font-bold text-primary">GymBuddies</h1>
+      <div className="flex items-center justify-center gap-2">
+        <Dumbbell />
+        <h1 className="text-2xl font-bold text-primary">GymBuddies</h1>
+      </div>
       {!user ? (
         <Button onClick={handleSignIn}>Login</Button>
       ) : (
