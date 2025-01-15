@@ -37,7 +37,7 @@ interface FooterProps {
 
 const Footer = ({ items }: FooterProps) => {
   return (
-    <footer className="bg-white shadow-sm">
+    <footer className="bg-white shadow-sm sticky z-50 bottom-0">
       <div className="flex justify-around items-center p-4">
         {items.map((item, index) => (
           <FooterItem key={index} {...item} />

@@ -9,7 +9,7 @@ interface HeaderProps {
 
 const Header = ({ isLoggedIn, userImage, userName }: HeaderProps) => {
   return (
-    <header className="flex justify-between items-center p-4 bg-white shadow-sm">
+    <header className="flex justify-between items-center p-4 bg-white shadow-sm sticky top-0 z-50">
       <h1 className="text-2xl font-bold text-primary">GymBuddies</h1>
       {isLoggedIn ? (
         <Avatar>
