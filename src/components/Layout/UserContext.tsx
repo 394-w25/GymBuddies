@@ -81,7 +81,13 @@ const UserContextProvider = ({ children }: { children: ReactNode }) => {
         handleSignOut,
       }}
     >
-      {loading ? <Spinner size="large" /> : children}
+      {loading ? (
+        <div className="min-h-screen flex items-center justify-center">
+          <Spinner size="large" />
+        </div>
+      ) : (
+        children
+      )}
     </UserContext.Provider>
   )
 }
