@@ -1,5 +1,5 @@
 import { useState } from "react"
-// import moment from "moment"
+import { getMaxSetVolume } from "@/lib/utils"
 import Moment from "react-moment"
 import { ChevronsUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -28,7 +28,7 @@ const ExerciseRow = ({ exercise }: ExerciseRowProps) => {
   return (
     <div className="rounded-md border px-3 py-3 text-sm mb-1 flex justify-between">
       <h2>{exercise.name}</h2>
-      <h2>---</h2>
+      <h2>{getMaxSetVolume(exercise)}</h2>
     </div>
   )
 }
@@ -41,7 +41,7 @@ interface WorkoutCardProps {
   date: Date
   durationInMinutes: number
   volume: number
-  exercises: [Exercise, ...Exercise[]]
+  exercises: Exercise[]
 }
 
 const WorkoutCard = ({ ...props }: WorkoutCardProps) => {
@@ -57,6 +57,14 @@ const WorkoutCard = ({ ...props }: WorkoutCardProps) => {
     } else {
       durationString = hours + " hours"
     }
+  }
+
+  let volumeString
+  if (props.volume < 1000) {
+    volumeString = props.volume.toString()
+  } else {
+    const volumeApprox = Math.round((props.volume / 1000) * 10) / 10
+    volumeString = volumeApprox + "k"
   }
 
   return (
@@ -79,8 +87,7 @@ const WorkoutCard = ({ ...props }: WorkoutCardProps) => {
         <div className="flex justify-between items-center gap-6 px-2 mb-6">
           <div className="flex flex-col">
             <h2 className="font-bold">Date</h2>
-            {/* <p>{moment(props.date).format("M/D/Y")}</p> */}
-            <Moment format="M/D/Y">{props.date}</Moment>
+            <Moment format="M/D/YY">{props.date}</Moment>
           </div>
           <div className="flex flex-col">
             <h2 className="font-bold">Duration</h2>
@@ -88,7 +95,7 @@ const WorkoutCard = ({ ...props }: WorkoutCardProps) => {
           </div>
           <div className="flex flex-col">
             <h2 className="font-bold">Volume</h2>
-            <p>{props.volume.toLocaleString()} lbs</p>
+            <p>{volumeString} lbs</p>
           </div>
         </div>
 
