@@ -6,11 +6,12 @@ import type { User as FirebaseUser } from "firebase/auth"
 import type { Workout, WorkoutLog } from "@/types/workout"
 
 export const addUser = async (user: FirebaseUser) => {
-  const { uid, photoURL, displayName } = user
+  const { uid, photoURL, displayName, email } = user
 
   const userData: User = {
     userId: uid,
     name: displayName || "",
+    email: email || "",
     profilePic: photoURL || "",
     friends: [],
     status: "",
@@ -64,7 +65,7 @@ export const addWorkout = async (userId: string, workout: WorkoutLog) => {
   }
 }
 
-export const getUser = async (userId: string) => {
+export const getUser = async (userId: string): Promise<User | null> => {
   try {
     const userRef = ref(database, `users/${userId}`)
     const snapshot = await get(userRef)
@@ -73,11 +74,11 @@ export const getUser = async (userId: string) => {
       return snapshot.val() as User
     } else {
       console.log(`Could not find user with id ${userId}`)
-      return {}
+      return null
     }
   } catch (err) {
     console.log(`An error occurred while trying to get user ${userId}:`, err)
-    return {}
+    return null
   }
 }
 
