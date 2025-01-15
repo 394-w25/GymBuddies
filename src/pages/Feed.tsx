@@ -17,6 +17,14 @@ const Feed = () => {
     }
 
     fetchUserWorkouts()
+
+    // Set up an interval to fetch every 10 seconds
+    const interval = setInterval(() => {
+      fetchUserWorkouts()
+    }, 10000)
+
+    // Clear the interval when the component unmounts
+    return () => clearInterval(interval)
   }, [])
 
   return (
