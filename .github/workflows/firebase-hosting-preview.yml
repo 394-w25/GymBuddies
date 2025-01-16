@@ -1,33 +1,23 @@
-name: Deploy on Main Push
+name: Preview Deploy on PR
 
 on:
-  push:
+  pull_request:
     branches:
       - main
-    paths:
-      - "src/**"
-      - "public/**"
-      - "firebase.json"
-      - "package.json"
-      - "index.html"
-      - "vitest.config.js"
-      - ".firebaserc"
-      - ".github/workflows/*"
-
-concurrency:
-  group: firebase-deploy-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
-  build-and-deploy:
-    name: 🛠️ Build, Test, and Deploy
+  deploy-preview:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
 
     steps:
-      - name: 📥 Checkout Code
+      - name: 📥 Checkout code
         uses: actions/checkout@v4
 
-      - name: 🛠️ Setup Node
+      - name: 📦 Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "lts/*"
@@ -41,29 +31,27 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-npm-cache-
 
-      - name: 📂 Install Packages
+      - name: 📂 Install dependencies
         run: npm ci
 
-      - name: 🧱 Build Project
-        run: npm run build
-
-      - name: 📦 Cache build output
+      - name: 📦 Restore build cache
         uses: actions/cache@v4
         with:
-          path: |
-            dist
+          path: dist
           key: ${{ runner.os }}-build-cache-${{ hashFiles('src/**', 'public/**') }}
           restore-keys: |
             ${{ runner.os }}-build-cache-
 
-      - name: 🌍 Install Firebase Tools
-        if: success()
+      - name: 🔨 Build the app
+        run: npm run build
+
+      - name: 🚀 Install Firebase CLI
         run: npm install -g firebase-tools
 
-      - name: 🚀 Deploy to Firebase
-        if: success()
+      - name: 🌐 Deploy to Firebase Preview Channel
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
+          repoToken: "${{ secrets.GITHUB_TOKEN }}"
           firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}"
+          expires: 30d
           projectId: gymbuddies-20bbf
-          channelId: live
