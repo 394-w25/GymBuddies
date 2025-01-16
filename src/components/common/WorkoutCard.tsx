@@ -77,7 +77,7 @@ const WorkoutCard = ({
 
   let durationString
   if (durationInMinutes < 60) {
-    durationString = durationInMinutes + " minutes"
+    durationString = durationInMinutes + " minutes [PREVIEW]"
   } else {
     const hours = Math.round((durationInMinutes / 60) * 10) / 10
     if (hours <= 1) {

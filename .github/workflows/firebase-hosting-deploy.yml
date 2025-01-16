@@ -20,7 +20,7 @@ concurrency:
 
 jobs:
   build-and-deploy:
-    name: 🛠️ Build, Test, and Deploy
+    name: 🛠️ Build and Deploy
     runs-on: ubuntu-latest
 
     steps:
