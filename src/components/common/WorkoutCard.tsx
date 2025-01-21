@@ -68,10 +68,20 @@ const WorkoutCard = ({
     getUserInfo()
   }, [userId])
 
-  const durationInMinutes = calculateMinutesBetweenDates(
-    workout.startTime,
-    workout.endTime
-  )
+  const getMinutes = () => {
+    const start = new Date(workout.startTime).getTime();
+    const end = new Date(workout.endTime).getTime();
+
+    const minutes = (end - start) / (1000 * 60);
+    return minutes;
+  }
+
+  const durationInMinutes = getMinutes();
+
+  // const durationInMinutes = calculateMinutesBetweenDates(
+  //   workout.startTime,
+  //   workout.endTime
+  // )
 
   const volume = calculateWorkoutVolume(workout.exercises)
 

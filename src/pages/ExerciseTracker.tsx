@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { addWorkout, getAllUserWorkouts } from "@/lib/db"
+import { addWorkout, getAllUserWorkouts, sortWorkouts } from "@/lib/db"
 import { useUser } from "@/components/Layout/UserContext"
 import { Button } from "@/components/ui/button"
 import { WorkoutLogModal } from "@/components/ExerciseTracker/WorkoutInput"
@@ -18,7 +18,8 @@ const ExerciseTracker = () => {
         if (res) {
           res.reverse()
           console.log(res)
-          setUserWorkouts(res)
+          const sorted = sortWorkouts(res)
+          setUserWorkouts(sorted)
         }
       }
     }

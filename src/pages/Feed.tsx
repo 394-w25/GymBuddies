@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { getAllWorkouts } from "@/lib/db"
+import { getAllWorkouts, sortWorkouts } from "@/lib/db"
 import WorkoutCard from "@/components/common/WorkoutCard"
 import type { Workout } from "@/types/workout"
 
@@ -12,7 +12,8 @@ const Feed = () => {
       if (res) {
         res.reverse()
         console.log(res)
-        setAllWorkouts(res)
+        const sortedRes = sortWorkouts(res);
+        setAllWorkouts(sortedRes);
       }
     }
 
