@@ -280,7 +280,7 @@ export const updateStreak = async (userId: string) => {
     const snapshot = await get(userRef)
     if (snapshot.exists()) {
       const userData = snapshot.val()
-      await update(userRef, { ...userData, streak: userData.streak + 1 })
+      await update(userRef, { streak: userData.streak + 1 })
     }
   } catch (err) {
     console.log(`failed to update streak for user ${userId}`, err)
