@@ -11,6 +11,18 @@ const ExerciseTracker = () => {
   const [userWorkouts, setUserWorkouts] = useState<Workout[] | null>([])
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
 
+  const fetchAndSetUserWorkouts = async () => {
+    if (user) {
+      const res = await getAllUserWorkouts(user.userId)
+      if (res) {
+        res.reverse()
+        console.log(res)
+        const sorted = sortWorkouts(res)
+        setUserWorkouts(sorted)
+      }
+    }
+  }
+
   useEffect(() => {
     const fetchUserWorkouts = async () => {
       if (user) {
@@ -29,7 +41,7 @@ const ExerciseTracker = () => {
     // Set up an interval to fetch every 10 seconds
     const interval = setInterval(() => {
       fetchUserWorkouts()
-    }, 10000)
+    }, 8000)
 
     // Clear the interval when the component unmounts
     return () => clearInterval(interval)
@@ -37,10 +49,14 @@ const ExerciseTracker = () => {
 
   const handleSaveWorkout = async (workout: WorkoutLog) => {
     // Todo: Zero out seconds
-    console.log(workout)
+    // console.log(workout)
+    // console.log(`START : ${workout.startTime} -- END : ${workout.endTime} -- DATE : ${workout.date}`)
     if (user && workout.exercises.length > 0) {
       await addWorkout(user.userId, workout)
     }
+
+    fetchAndSetUserWorkouts();
+
   }
 
   return (

@@ -17,8 +17,12 @@ export const sortWorkouts = (workouts : Workout[]) => {
     // sorting MOST recent to LEAST
 
     return Number(b.date) - Number(a.date);
+
   });
 
+  for(const wkt of workouts) {
+    console.log(`${wkt.title} -- ${wkt.date}`);
+  }
   return workouts;
 }
 
@@ -70,8 +74,16 @@ export const addWorkout = async (userId: string, workout: WorkoutLog) => {
     exercises: workout.exercises,
   }
 
+  const workoutDataAdjustForDates = {
+    ...workoutData,
+    date : Number(workoutData.date),
+    startTime : Number(workoutData.startTime),
+    endTime : Number(workoutData.endTime),
+
+  }
+
   try {
-    await set(ref(database, `workouts/${workoutId}`), workoutData)
+    await set(ref(database, `workouts/${workoutId}`), workoutDataAdjustForDates)
 
     // Update workouts array for user
     const userRef = ref(database, `users/${userId}/workouts`)
@@ -83,16 +95,17 @@ export const addWorkout = async (userId: string, workout: WorkoutLog) => {
     await update(ref(database, `users/${userId}`), { workouts: userWorkouts })
 
     console.log(`Workout ${workoutId} added for user ${userId}`)
+    console.log(`AND IT LOOKS LIKE : ${JSON.stringify(workout)}`)
 
     return workoutId;
   } catch (error) {
     console.log("Error adding workout:", error)
     return false
   }
+
 }
 
 export const updateWorkout = async (userId : string, workoutId : string, workout : WorkoutLog) => {
-
 
   if (workout.endTime) {
     const workoutData: Workout = {
@@ -128,11 +141,10 @@ export const updateWorkout = async (userId : string, workoutId : string, workout
   }
 
   
-
 } 
 
 
-export const getUser = async (userId: string) => {
+export const getUser = async (userId: string) : Promise<User | {}> => {
   try {
     const userRef = ref(database, `users/${userId}`)
     const snapshot = await get(userRef)
@@ -176,14 +188,14 @@ export const getAllUserWorkouts = async (
   try {
     const user = await getUser(userId)
     if (!user) {
-      console.error(`User with id ${userId} does not exist.`)
-      return null
+      console.error(`User with id ${userId} does not exist.`);
+      return null;
     }
 
     const workoutIds = user.workouts || []
     if (workoutIds.length === 0) {
       console.log(`No workouts found for user ${userId}.`)
-      return []
+      return [];
     }
 
     const workoutPromises = workoutIds.map((workoutId) => getWorkout(workoutId))
@@ -194,7 +206,7 @@ export const getAllUserWorkouts = async (
         workout && Object.keys(workout).length > 0
     )
 
-    return validWorkouts
+    return sortWorkouts(validWorkouts);
   } catch (error) {
     console.error(
       `An error occurred while fetching workouts for user ${userId}:`,
@@ -225,7 +237,7 @@ export const getAllWorkouts = async (): Promise<Workout[]> => {
         return typedWorkout
       })
 
-      return workouts
+      return sortWorkouts(workouts);
     } else {
       console.log(`No workouts found in the database.`)
       return []
