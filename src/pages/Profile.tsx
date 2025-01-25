@@ -1,16 +1,60 @@
 import WeightliftingChart from "@/components/Profile/WeightliftingChart"
 import { useUser } from "@/components/Layout/UserContext"
-
+import { getPoundsPerPeriod, WeightData } from "@/lib/count_workouts"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useEffect, useState } from "react"
+import { getAllUserWorkouts, sortWorkouts } from "@/lib/db"
+import { Workout } from "@/types/workout"
+import WorkoutCard from "@/components/common/WorkoutCard"
 
 
 
 const Profile = () => {
-  const { user } = useUser()
+  const { user } = useUser();
+  const [userWorkouts, setUserWorkouts] = useState<Workout[]>([]);
   // console.log(`bio : ${user.bio}`);
+  // const [weightData, setWeightData] = useState<WeightData[]>([]);
+  // const [weeks, months] = getPoundsPerPeriod(userWorkouts, (new Date()).getMonth());
+  // console.log(`weeks : ${JSON.stringify(weeks)}`)
+  // setWeightData(weeks);
+
+
+  useEffect(() => {
+    const fetchUserWorkouts = async () => {
+      if (user) {
+        const res = await getAllUserWorkouts(user.userId)
+        if (res) {
+          res.reverse()
+          console.log(res)
+          const sorted = sortWorkouts(res)
+          setUserWorkouts(sorted)
+        }
+      }
+    }
+
+    fetchUserWorkouts()
+
+    // Set up an interval to fetch every 10 seconds
+    const interval = setInterval(() => {
+      fetchUserWorkouts()
+    }, 8000)
+
+    // Clear the interval when the component unmounts
+    return () => clearInterval(interval)
+  }, [user])
+
+  // useEffect(() => {
+  //   const [weeks, months] = getPoundsPerPeriod(userWorkouts, (new Date()).getMonth());
+  //   console.log(`weeks : ${JSON.stringify(weeks)}`)
+  //   setWeightData(weeks);
+
+  // }, [userWorkouts])
+
+
+
 
   return (
     <div className="w-full">
@@ -28,16 +72,16 @@ const Profile = () => {
           <div className="stats-portion w-full flex flex-col">
             <Card className="w-full mt-5 flex flex-col text-left">
               <CardHeader>
-                <div className="flex w-full justify-between">
+                <div className="flex flex-col md:flex-row w-full justify-between">
                   <div>
                     <CardTitle>Strength Tracker</CardTitle>
                     <CardDescription>Track your progress, watch your growth.</CardDescription>
                   </div>
 
-                  <div className="">
+                  <div className="mt-3 md:mt-0">
                     <Label htmlFor="time-period">Time Period</Label>
                     <Select>
-                      <SelectTrigger className="w-[180px]" id="time-period">
+                      <SelectTrigger className="lg:w-[180px]" id="time-period">
                         <SelectValue placeholder="Month" />
                       </SelectTrigger>
                       <SelectContent position="popper">
@@ -50,9 +94,25 @@ const Profile = () => {
               </CardHeader>
 
               <CardContent className="w-full h-full flex flex-col ">
-                <WeightliftingChart timePeriod="month" />
+                <WeightliftingChart data={getPoundsPerPeriod(userWorkouts, (new Date()).getMonth())[0]} />
               </CardContent>
             </Card>
+          </div>
+
+
+          <div className="workouts-feed w-full flex overflow-y-scroll max-h-[80vh] mt-5 p-4 box-border border bg-teal-50 shadow-inner rounded-md">
+            <div className="flex flex-col gap-4 w-full">
+              {userWorkouts?.map((workout, key) => (
+                <WorkoutCard
+                  key={key}
+                  userId={workout.userId}
+                  workout={workout}
+                  username={user.name}
+                  profilePic={user.profilePic}
+                  displayProfile={false}
+                />
+              ))}
+            </div>
           </div>
         </div>
       )}
