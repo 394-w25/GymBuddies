@@ -283,3 +283,4 @@ export const addFriend = async (userId :string, friendId: string) => {
   return true;
 
 }
+
