@@ -15,6 +15,7 @@ import WorkoutCard from "@/components/common/WorkoutCard"
 const Profile = () => {
   const { user } = useUser();
   const [userWorkouts, setUserWorkouts] = useState<Workout[]>([]);
+  const [monthOrYear, setMonthOrYear] = useState('month');
   // console.log(`bio : ${user.bio}`);
   // const [weightData, setWeightData] = useState<WeightData[]>([]);
   // const [weeks, months] = getPoundsPerPeriod(userWorkouts, (new Date()).getMonth());
@@ -38,12 +39,12 @@ const Profile = () => {
     fetchUserWorkouts()
 
     // Set up an interval to fetch every 10 seconds
-    const interval = setInterval(() => {
-      fetchUserWorkouts()
-    }, 8000)
+    // const interval = setInterval(() => {
+    //   fetchUserWorkouts()
+    // }, 8000)
 
-    // Clear the interval when the component unmounts
-    return () => clearInterval(interval)
+    // // Clear the interval when the component unmounts
+    // return () => clearInterval(interval)
   }, [user])
 
   // useEffect(() => {
@@ -52,6 +53,7 @@ const Profile = () => {
   //   setWeightData(weeks);
 
   // }, [userWorkouts])
+
 
 
 
@@ -80,7 +82,7 @@ const Profile = () => {
 
                   <div className="mt-3 md:mt-0">
                     <Label htmlFor="time-period">Time Period</Label>
-                    <Select>
+                    <Select onValueChange={(val) => setMonthOrYear(val)}>
                       <SelectTrigger className="lg:w-[180px]" id="time-period">
                         <SelectValue placeholder="Month" />
                       </SelectTrigger>
@@ -94,14 +96,14 @@ const Profile = () => {
               </CardHeader>
 
               <CardContent className="w-full h-full flex flex-col ">
-                <WeightliftingChart data={getPoundsPerPeriod(userWorkouts, (new Date()).getMonth())[0]} />
+                <WeightliftingChart data={((monthOrYear==='month') ? getPoundsPerPeriod(userWorkouts, (new Date()).getMonth())[0] : getPoundsPerPeriod(userWorkouts, (new Date()).getMonth())[1])} />
               </CardContent>
             </Card>
           </div>
 
 
-          <div className="workouts-feed w-full flex overflow-y-scroll max-h-[80vh] mt-5 p-4 box-border border bg-teal-50 shadow-inner rounded-md">
-            <div className="flex flex-col gap-4 w-full">
+          <div className="workouts-feed w-full flex h-[50vh] md:h-[80vh] mt-5 p-4 box-border border bg-teal-50 shadow-inner rounded-md">
+            <div className="flex flex-col gap-4 w-full overflow-y-scroll">
               {userWorkouts?.map((workout, key) => (
                 <WorkoutCard
                   key={key}

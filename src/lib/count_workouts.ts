@@ -1,5 +1,5 @@
 import { Workout } from "@/types/workout";
-import { ChartNoAxesColumnDecreasingIcon } from "lucide-react";
+import { calculateWorkoutVolume } from "./utils";
 
 export interface WeightData {
     timePeriod : string;
@@ -39,7 +39,7 @@ export const getPoundsPerPeriod = (workouts : Workout[], month : number) => {
         const d = (new Date(wkt.date));
         let wktMonth = d.getMonth();
         // console.log(`DATE : ${d} - MONTH : ${wktMonth}`);
-        monthBreakdown[wktMonth].weight += 1;
+        monthBreakdown[wktMonth].weight += calculateWorkoutVolume(wkt.exercises);
 
 
         if(wktMonth === month) {
@@ -51,7 +51,7 @@ export const getPoundsPerPeriod = (workouts : Workout[], month : number) => {
             // console.log(`DATE : ${d} - DAY - ${d.getDate()} WEEK : ${week}`);
 
             // console.log(`weekBreakdown : ${JSON.stringify(weekBreakdown[week])}`);
-            weekBreakdown[week].weight += 1;
+            weekBreakdown[week].weight += calculateWorkoutVolume(wkt.exercises);
         }
     }
 
