@@ -1,27 +1,9 @@
 import { database } from "@/lib/firebase"
-import { get, ref, set, update } from "firebase/database"
+import { get, ref, set, update, onValue, off } from "firebase/database"
 import { v4 as uuidv4 } from "uuid"
 import type { User } from "@/types/user"
 import type { User as FirebaseUser } from "firebase/auth"
 import type { Workout, WorkoutLog } from "@/types/workout"
-
-export const sortWorkouts = (workouts: Workout[]) => {
-  workouts.sort((a, b) => {
-    // console.log(a.date.getTime() - b.date.getTime());
-    // return (new Date(a.date)).getTime() - (new Date(b.date)).getTime();
-    // console.log(JSON.stringify(a));
-    // console.log(JSON.stringify(b));
-
-    // sorting MOST recent to LEAST
-
-    return Number(b.date) - Number(a.date)
-  })
-
-  for (const wkt of workouts) {
-    console.log(`${wkt.title} -- ${wkt.date}`)
-  }
-  return workouts
-}
 
 export const addUser = async (user: FirebaseUser) => {
   const { uid, photoURL, displayName, email } = user
@@ -209,27 +191,48 @@ export const getAllUserWorkouts = async (
   }
 }
 
+export const sortWorkouts = (workouts: Workout[]) => {
+  workouts.sort((a, b) => Number(b.date) - Number(a.date))
+  return workouts
+}
+
+const transformWorkouts = (workoutsData: unknown): Workout[] => {
+  return Object.values(workoutsData || {}).map((workout) => {
+    const typedWorkout = workout as Workout
+
+    if (typedWorkout.date) typedWorkout.date = new Date(typedWorkout.date)
+    if (typedWorkout.startTime)
+      typedWorkout.startTime = new Date(typedWorkout.startTime)
+    if (typedWorkout.endTime)
+      typedWorkout.endTime = new Date(typedWorkout.endTime)
+
+    return typedWorkout
+  })
+}
+
+export const listenToWorkouts = (callback: (workouts: Workout[]) => void) => {
+  const workoutsRef = ref(database, "workouts")
+
+  const listener = onValue(workoutsRef, (snapshot) => {
+    if (snapshot.exists()) {
+      const workouts = transformWorkouts(snapshot.val())
+      callback(sortWorkouts(workouts))
+    } else {
+      callback([])
+    }
+  })
+
+  // Return unsubscribe function
+  return () => off(workoutsRef, "value", listener)
+}
+
 export const getAllWorkouts = async (): Promise<Workout[]> => {
   try {
     const workoutsRef = ref(database, `workouts`)
     const snapshot = await get(workoutsRef)
 
     if (snapshot.exists()) {
-      const workoutsData = snapshot.val()
-
-      // Transform the workouts object into an array and convert timestamps
-      const workouts: Workout[] = Object.values(workoutsData).map((workout) => {
-        const typedWorkout = workout as Workout
-
-        if (typedWorkout.date) typedWorkout.date = new Date(typedWorkout.date)
-        if (typedWorkout.startTime)
-          typedWorkout.startTime = new Date(typedWorkout.startTime)
-        if (typedWorkout.endTime)
-          typedWorkout.endTime = new Date(typedWorkout.endTime)
-
-        return typedWorkout
-      })
-
+      const workouts = transformWorkouts(snapshot.val())
       return sortWorkouts(workouts)
     } else {
       console.log(`No workouts found in the database.`)
