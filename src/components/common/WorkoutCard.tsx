@@ -74,11 +74,6 @@ const WorkoutCard = ({
 
   const durationInMinutes = getMinutes()
 
-  // const durationInMinutes = calculateMinutesBetweenDates(
-  //   workout.startTime,
-  //   workout.endTime
-  // )
-
   const volume = calculateWorkoutVolume(workout.exercises)
 
   let durationString
@@ -147,7 +142,6 @@ const WorkoutCard = ({
           <h1 className="font-bold">Exercise</h1>
           <h1 className="font-bold">Best Set</h1>
         </div>
-        {/* Todo: Calculate best set */}
         <ExerciseRow exercise={workout.exercises[0]} />
 
         {workout.exercises.length > 1 && (
