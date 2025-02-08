@@ -27,11 +27,12 @@ export const sortWorkouts = (workouts : Workout[]) => {
 }
 
 export const addUser = async (user: FirebaseUser) => {
-  const { uid, photoURL, displayName } = user
+  const { uid, photoURL, email, displayName } = user
 
   const userData: User = {
     userId: uid,
     name: displayName || "",
+    email : email || "",
     profilePic: photoURL || "",
     friends: [],
     status: false,
@@ -186,11 +187,13 @@ export const getAllUserWorkouts = async (
   userId: string
 ): Promise<Workout[] | null> => {
   try {
-    const user = await getUser(userId)
-    if (!user) {
+    let userRet = await getUser(userId)
+    if (!userRet) {
       console.error(`User with id ${userId} does not exist.`);
       return null;
     }
+
+    const user = userRet as User; // stupid mf typescript
 
     const workoutIds = user.workouts || []
     if (workoutIds.length === 0) {
@@ -249,7 +252,7 @@ export const getAllWorkouts = async (): Promise<Workout[]> => {
 }
 
 
-export const addFriend = async (userId :string, friendId: string) => {
+export const addFriend = async (userId :string, friendId: string) => { // DEPRECATED
 
   //add friend's id to user friend list
   get(ref(database, `users/${userId}`)).then((data) => {
@@ -284,3 +287,96 @@ export const addFriend = async (userId :string, friendId: string) => {
 
 }
 
+export const followUser = async (followerId : string, followedId : string) : Promise<boolean> => {
+
+  
+  try {
+    // add following to follower's following list
+    get(ref(database, `users/${followerId}`)).then((data) => {
+      if(!data.exists()) {
+        throw new Error("Failed to get data about user trying to follow.")
+      }
+
+      const followerUser = data.val();
+      update(ref(database, `user/${followerId}`), {following : ((followerUser.following !== undefined) ? [...followerUser.following, followedId] : [followedId])}); // make sure you can't re-follow in frontend implementation, not here ?
+    });
+
+    // add follower to followed's follower list
+    get(ref(database, `users/${followedId}`)).then((data) => {
+      if (!data.exists()) {
+        throw new Error("Failed to get data about user being followed");
+      }
+
+      const followedUser = data.val();
+
+      update(ref(database, `users/${followedId}`), {followers : ((followedUser.followers !== undefined) ? [...followedUser.following, followerId] : [followerId])});
+    })
+
+    return true;
+
+  } catch (err) {
+    console.log("ERROR ocurred during follow -- ", err);
+    return false;
+  }
+
+}
+
+export const getFollowersOfUser = async (userId : string) : Promise<string[] | undefined> => {
+  try {
+    const data = await get(ref(database, `users/${userId}`));
+    if (!data.exists()) {
+      throw new Error(`Couldn't fetch data for user with userId ${userId}`);
+    }
+
+    const userData = data.val();
+    if(!userData) {
+      throw new Error(`User ${userId} has no data in the system....`);
+    }
+
+    const user = userData as User;
+
+    if (user.hasOwnProperty("followers") && user.followers !== undefined) {
+      console.log(`GETTER BELIEVES IT SUCCESSFULLY GOT -- ${user.followers}`);
+      // return user.followers;
+      return user.followers;
+    } 
+
+    return [];
+
+
+  } catch (err) {
+    console.log("ERROR ocurred when getting followers -- ", err);
+    return [];
+  }
+}
+
+export const getFollowingOfUser = async (userId : string) : Promise<string[] | undefined> => {
+  try {
+    const data = await get(ref(database, `users/${userId}`));
+
+    if (!data.exists()) {
+      throw new Error(`Couldn't fetch data for user with userId ${userId}`);
+    }
+
+    const userData = data.val();
+    if(!userData) {
+      throw new Error(`User ${userId} has no data in the system....`);
+    }
+
+    const user = userData as User;
+
+    if (user.hasOwnProperty("following")) {
+      console.log(`GETTER BELIEVES IT SUCCESSFULLY GOT -- ${user.following}`);
+      // return user.following;
+      return user.following;
+    }
+
+    return []
+
+
+
+  } catch (err) {
+    console.log("ERROR ocurred when getting following -- ", err);
+    return [];
+  }
+}

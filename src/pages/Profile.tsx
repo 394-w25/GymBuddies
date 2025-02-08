@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useEffect, useState } from "react"
-import { getAllUserWorkouts, sortWorkouts } from "@/lib/db"
+import { getAllUserWorkouts, sortWorkouts, getFollowersOfUser, getFollowingOfUser } from "@/lib/db"
 import { Workout } from "@/types/workout"
 import WorkoutCard from "@/components/common/WorkoutCard"
 
@@ -16,6 +16,7 @@ const Profile = () => {
   const { user } = useUser();
   const [userWorkouts, setUserWorkouts] = useState<Workout[]>([]);
   const [monthOrYear, setMonthOrYear] = useState('month');
+  const [friendsData, setFriendsData] = useState<{following : string[], followers : string[]}>({following : [], followers : []});
   // console.log(`bio : ${user.bio}`);
   // const [weightData, setWeightData] = useState<WeightData[]>([]);
   // const [weeks, months] = getPoundsPerPeriod(userWorkouts, (new Date()).getMonth());
@@ -36,7 +37,6 @@ const Profile = () => {
       }
     }
 
-    fetchUserWorkouts()
 
     // Set up an interval to fetch every 10 seconds
     // const interval = setInterval(() => {
@@ -45,6 +45,37 @@ const Profile = () => {
 
     // // Clear the interval when the component unmounts
     // return () => clearInterval(interval)
+
+    const fetchUserFollowersFollowing = async () => {
+      if (user) {
+
+        const [followersList, followingList] = await Promise.all(
+          [
+            getFollowersOfUser(user.userId),
+            getFollowingOfUser(user.userId)
+          ]
+        );
+
+        console.log(`FOLLOWERS : ${followersList} -- FOLLOWING : ${followingList}`);
+
+        if (followersList !== undefined && followingList !== undefined) {
+          setFriendsData((prev) => {
+              return {
+                ...prev,
+                following : followingList as string[],
+                followers : followersList as string[],
+              }
+            }
+          )
+        }
+         
+      }
+    }
+
+    fetchUserFollowersFollowing();
+    fetchUserWorkouts()
+
+
   }, [user])
 
   // useEffect(() => {
@@ -69,6 +100,13 @@ const Profile = () => {
             </Avatar>
             <h1 className="text-2xl font-bold">{user.name}</h1>
             {user.bio && <p className="text-gray-600 w-[80%] my-4">{user.bio}</p>}
+
+            {/* FOLLOWERS AND FOLLOWING */}
+            <div className="follower-following flex flex-row w-full gap-10 justify-center items-center">
+              <p className=""><span className="font-bold">{friendsData.followers.length}</span> Followers</p>
+              <p className=""><span className="font-bold">{friendsData.following.length}</span> Following</p>
+
+            </div>
           </div>
 
           <div className="stats-portion w-full flex flex-col">
