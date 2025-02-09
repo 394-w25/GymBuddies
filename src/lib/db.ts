@@ -1,40 +1,20 @@
 import { database } from "@/lib/firebase"
-import { get, ref, set, update } from "firebase/database"
+import { get, ref, set, update, onValue, off } from "firebase/database"
 import { v4 as uuidv4 } from "uuid"
 import type { User } from "@/types/user"
 import type { User as FirebaseUser } from "firebase/auth"
 import type { Workout, WorkoutLog } from "@/types/workout"
-// import { deepEqual, deepStrictEqual } from "assert"
-
-
-export const sortWorkouts = (workouts : Workout[]) => {
-  workouts.sort((a, b) => {
-    // console.log(a.date.getTime() - b.date.getTime());
-    // return (new Date(a.date)).getTime() - (new Date(b.date)).getTime();
-    // console.log(JSON.stringify(a));
-    // console.log(JSON.stringify(b));
-
-    // sorting MOST recent to LEAST
-
-    return Number(b.date) - Number(a.date);
-
-  });
-
-  for(const wkt of workouts) {
-    console.log(`${wkt.title} -- ${wkt.date}`);
-  }
-  return workouts;
-}
 
 export const addUser = async (user: FirebaseUser) => {
-  const { uid, photoURL, displayName } = user
+  const { uid, photoURL, displayName, email } = user
 
   const userData: User = {
     userId: uid,
     name: displayName || "",
+    email: email || "",
     profilePic: photoURL || "",
     friends: [],
-    status: false,
+    status: "",
     bio: "",
     streak: 0,
     workouts: [],
@@ -50,40 +30,49 @@ export const addUser = async (user: FirebaseUser) => {
   }
 }
 
-export const updateUserStatus = async (userId : string, status: boolean) => {
-    try {
-      await update(ref(database, `users/${userId}`), {status : status});
-      return true;
-    } catch (err) {
-      console.log(`failed to update user ${userId}`, err);
-      return false;
+export const updateUserStatus = async (userId: string, status: boolean) => {
+  try {
+    await update(ref(database, `users/${userId}`), { status: status })
+    return true
+  } catch (err) {
+    console.log(`failed to update user ${userId}`, err)
+    return false
+  }
+}
+
+export const getUser = async (userId: string) => {
+  try {
+    const userRef = ref(database, `users/${userId}`)
+    const snapshot = await get(userRef)
+
+    if (snapshot.exists()) {
+      return snapshot.val() as User
+    } else {
+      console.log(`Could not find user with id ${userId}`)
+      return null
     }
+  } catch (err) {
+    console.log(`An error occurred while trying to get user ${userId}:`, err)
+    return null
+  }
 }
 
 export const addWorkout = async (userId: string, workout: WorkoutLog) => {
   const workoutId = uuidv4()
 
-  const workoutData: Workout = {
+  const workoutData = {
     workoutId,
     userId: userId,
     title: workout.title,
     caption: workout.caption,
-    date: workout.date,
-    startTime: workout.startTime,
-    endTime: workout.endTime,
+    date: workout.date.getTime(),
+    startTime: workout.startTime.getTime(),
+    endTime: workout.endTime.getTime(),
     exercises: workout.exercises,
   }
 
-  const workoutDataAdjustForDates = {
-    ...workoutData,
-    date : Number(workoutData.date),
-    startTime : Number(workoutData.startTime),
-    endTime : Number(workoutData.endTime),
-
-  }
-
   try {
-    await set(ref(database, `workouts/${workoutId}`), workoutDataAdjustForDates)
+    await set(ref(database, `workouts/${workoutId}`), workoutData)
 
     // Update workouts array for user
     const userRef = ref(database, `users/${userId}/workouts`)
@@ -95,18 +84,19 @@ export const addWorkout = async (userId: string, workout: WorkoutLog) => {
     await update(ref(database, `users/${userId}`), { workouts: userWorkouts })
 
     console.log(`Workout ${workoutId} added for user ${userId}`)
-    console.log(`AND IT LOOKS LIKE : ${JSON.stringify(workout)}`)
 
-    return workoutId;
+    return workoutId
   } catch (error) {
     console.log("Error adding workout:", error)
     return false
   }
-
 }
 
-export const updateWorkout = async (userId : string, workoutId : string, workout : WorkoutLog) => {
-
+export const updateWorkout = async (
+  userId: string,
+  workoutId: string,
+  workout: WorkoutLog
+) => {
   if (workout.endTime) {
     const workoutData: Workout = {
       workoutId,
@@ -120,44 +110,21 @@ export const updateWorkout = async (userId : string, workoutId : string, workout
     }
 
     try {
-      await set(ref(database, `workouts/${workoutId}`), workoutData);
-      return true;
-
+      await set(ref(database, `workouts/${workoutId}`), workoutData)
+      return true
     } catch (err) {
-      console.log(`could not update finalized workout : `, err);
-      return false;
+      console.log(`could not update finalized workout : `, err)
+      return false
     }
-
   } else {
     try {
-      await update(ref(database, `workouts/${workoutId}`), workout);
+      await update(ref(database, `workouts/${workoutId}`), workout)
 
-      return true;
-
+      return true
     } catch (err) {
-      console.log(`could not update workout : `, err);
-      return false;
+      console.log(`could not update workout : `, err)
+      return false
     }
-  }
-
-  
-} 
-
-
-export const getUser = async (userId: string) : Promise<User | {}> => {
-  try {
-    const userRef = ref(database, `users/${userId}`)
-    const snapshot = await get(userRef)
-
-    if (snapshot.exists()) {
-      return snapshot.val() as User
-    } else {
-      console.log(`Could not find user with id ${userId}`)
-      return {}
-    }
-  } catch (err) {
-    console.log(`An error occurred while trying to get user ${userId}:`, err)
-    return {}
   }
 }
 
@@ -182,38 +149,39 @@ export const getWorkout = async (workoutId: string) => {
   }
 }
 
-export const getAllUserWorkouts = async (
-  userId: string
-): Promise<Workout[] | null> => {
-  try {
-    const user = await getUser(userId)
-    if (!user) {
-      console.error(`User with id ${userId} does not exist.`);
-      return null;
+export const sortWorkouts = (workouts: Workout[]) => {
+  workouts.sort((a, b) => Number(b.date) - Number(a.date))
+  return workouts
+}
+
+const transformWorkouts = (workoutsData: unknown): Workout[] => {
+  return Object.values(workoutsData || {}).map((workout) => {
+    const typedWorkout = workout as Workout
+
+    if (typedWorkout.date) typedWorkout.date = new Date(typedWorkout.date)
+    if (typedWorkout.startTime)
+      typedWorkout.startTime = new Date(typedWorkout.startTime)
+    if (typedWorkout.endTime)
+      typedWorkout.endTime = new Date(typedWorkout.endTime)
+
+    return typedWorkout
+  })
+}
+
+export const listenToWorkouts = (callback: (workouts: Workout[]) => void) => {
+  const workoutsRef = ref(database, "workouts")
+
+  const listener = onValue(workoutsRef, (snapshot) => {
+    if (snapshot.exists()) {
+      const workouts = transformWorkouts(snapshot.val())
+      callback(sortWorkouts(workouts))
+    } else {
+      callback([])
     }
+  })
 
-    const workoutIds = user.workouts || []
-    if (workoutIds.length === 0) {
-      console.log(`No workouts found for user ${userId}.`)
-      return [];
-    }
-
-    const workoutPromises = workoutIds.map((workoutId) => getWorkout(workoutId))
-    const workouts = await Promise.all(workoutPromises)
-
-    const validWorkouts = workouts.filter(
-      (workout): workout is Workout =>
-        workout && Object.keys(workout).length > 0
-    )
-
-    return sortWorkouts(validWorkouts);
-  } catch (error) {
-    console.error(
-      `An error occurred while fetching workouts for user ${userId}:`,
-      error
-    )
-    return null
-  }
+  // Return unsubscribe function
+  return () => off(workoutsRef, "value", listener)
 }
 
 export const getAllWorkouts = async (): Promise<Workout[]> => {
@@ -222,22 +190,8 @@ export const getAllWorkouts = async (): Promise<Workout[]> => {
     const snapshot = await get(workoutsRef)
 
     if (snapshot.exists()) {
-      const workoutsData = snapshot.val()
-
-      // Transform the workouts object into an array and convert timestamps
-      const workouts: Workout[] = Object.values(workoutsData).map((workout) => {
-        const typedWorkout = workout as Workout
-
-        if (typedWorkout.date) typedWorkout.date = new Date(typedWorkout.date)
-        if (typedWorkout.startTime)
-          typedWorkout.startTime = new Date(typedWorkout.startTime)
-        if (typedWorkout.endTime)
-          typedWorkout.endTime = new Date(typedWorkout.endTime)
-
-        return typedWorkout
-      })
-
-      return sortWorkouts(workouts);
+      const workouts = transformWorkouts(snapshot.val())
+      return sortWorkouts(workouts)
     } else {
       console.log(`No workouts found in the database.`)
       return []
@@ -248,21 +202,60 @@ export const getAllWorkouts = async (): Promise<Workout[]> => {
   }
 }
 
-
-export const addFriend = async (userId :string, friendId: string) => {
-
-  //add friend's id to user friend list
-  get(ref(database, `users/${userId}`)).then((data) => {
-    if (!data.exists()) {
-      // no data, no pass
-      throw new Error("Failed to fetch user from database :(");
+export const getAllUserWorkouts = async (
+  userId: string
+): Promise<Workout[] | null> => {
+  try {
+    const user = await getUser(userId)
+    if (!user) {
+      console.error(`User with id ${userId} does not exist.`)
+      return null
     }
-    const currUser = data.val();
-    update(ref(database, `users/${userId}`), {friends : ((currUser.friends !== undefined) ? [...currUser.friends, friendId] : [friendId] ) })
-  }).catch((err) => {
-    console.log(`error ocurred while trying to look up user ${userId}`, err);
-    return false;
-  }) 
+
+    const workoutIds = user.workouts || []
+    if (workoutIds.length === 0) {
+      console.log(`No workouts found for user ${userId}.`)
+      return []
+    }
+
+    const workoutPromises = workoutIds.map((workoutId) => getWorkout(workoutId))
+    const workouts = await Promise.all(workoutPromises)
+
+    const validWorkouts = workouts.filter(
+      (workout): workout is Workout =>
+        workout && Object.keys(workout).length > 0
+    )
+
+    return sortWorkouts(validWorkouts)
+  } catch (error) {
+    console.error(
+      `An error occurred while fetching workouts for user ${userId}:`,
+      error
+    )
+    return null
+  }
+}
+
+export const addFriend = async (userId: string, friendId: string) => {
+  //add friend's id to user friend list
+  get(ref(database, `users/${userId}`))
+    .then((data) => {
+      if (!data.exists()) {
+        // no data, no pass
+        throw new Error("Failed to fetch user from database :(")
+      }
+      const currUser = data.val()
+      update(ref(database, `users/${userId}`), {
+        friends:
+          currUser.friends !== undefined
+            ? [...currUser.friends, friendId]
+            : [friendId],
+      })
+    })
+    .catch((err) => {
+      console.log(`error ocurred while trying to look up user ${userId}`, err)
+      return false
+    })
 
   // right now just force both people to be friends
 

@@ -1,10 +1,6 @@
 import { useEffect, useState } from "react"
 import { getUser } from "@/lib/db"
-import {
-  calculateMinutesBetweenDates,
-  calculateWorkoutVolume,
-  getBestSet,
-} from "@/lib/utils"
+import { calculateWorkoutVolume, getBestSet } from "@/lib/utils"
 import Moment from "react-moment"
 import { ChevronsUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -69,19 +65,14 @@ const WorkoutCard = ({
   }, [userId])
 
   const getMinutes = () => {
-    const start = new Date(workout.startTime).getTime();
-    const end = new Date(workout.endTime).getTime();
+    const start = new Date(workout.startTime).getTime()
+    const end = new Date(workout.endTime).getTime()
 
-    const minutes = (end - start) / (1000 * 60);
-    return minutes;
+    const minutes = (end - start) / (1000 * 60)
+    return minutes
   }
 
-  const durationInMinutes = getMinutes();
-
-  // const durationInMinutes = calculateMinutesBetweenDates(
-  //   workout.startTime,
-  //   workout.endTime
-  // )
+  const durationInMinutes = getMinutes()
 
   const volume = calculateWorkoutVolume(workout.exercises)
 
@@ -151,7 +142,6 @@ const WorkoutCard = ({
           <h1 className="font-bold">Exercise</h1>
           <h1 className="font-bold">Best Set</h1>
         </div>
-        {/* Todo: Calculate best set */}
         <ExerciseRow exercise={workout.exercises[0]} />
 
         {workout.exercises.length > 1 && (
