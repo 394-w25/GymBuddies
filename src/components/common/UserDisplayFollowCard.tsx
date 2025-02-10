@@ -32,7 +32,7 @@ export default function UserDisplayFollowCard({displayedUser}: Props) {
             <img className="rounded-full object-scale-down" src={displayedUser.profilePic} />
         </div>
 
-        <div className="user-name min-w-[60%]  overflow-hidden overflow-ellipsis -ml-10 md:-ml-20">
+        <div className="user-name min-w-[60%]  overflow-hidden overflow-ellipsis -ml-5 ">
             <h1 className="text-start  overflow-ellipsis">{displayedUser.name}</h1>
         </div>
 
