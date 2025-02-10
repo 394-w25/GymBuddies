@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react"
 import { getUser } from "@/lib/db"
 import {
-  calculateMinutesBetweenDates,
   calculateWorkoutVolume,
   getBestSet,
 } from "@/lib/utils"

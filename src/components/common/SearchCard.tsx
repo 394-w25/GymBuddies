@@ -1,4 +1,4 @@
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogDescription, DialogTitle } from "../ui/dialog"
+import { Dialog, DialogTrigger, DialogContent, DialogDescription, DialogTitle } from "../ui/dialog"
 import { Button } from "../ui/button"
 import { Input } from "../ui/input"
 import { useEffect, useState } from "react"
@@ -6,7 +6,6 @@ import { User } from "@/types/user"
 import { memo } from "react"
 import * as React from "react"
 import { fuzzySearch } from "@/lib/fuzzy_search"
-import * as internal from "stream"
 import UserDisplayFollowCard from "./UserDisplayFollowCard"
 
 
@@ -103,7 +102,7 @@ function unmemoedSearchCard({currentKnownUsers}: Props) {
                 <div className="list-of-known-users-matching-search flex flex-col mt-3 gap-1 py-1 border border-gray-200 bg-gray-100 rounded-md justify-start items-center max-h-[30vh] overflow-x-hidden overflow-y-scroll">
 
                     {
-                        renderedUserList.map((user, idx) => (
+                        renderedUserList.map((user) => (
                             <UserDisplayFollowCard displayedUser={user} key={user.userId} />
                         ))
                     }
