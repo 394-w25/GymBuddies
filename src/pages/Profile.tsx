@@ -13,7 +13,7 @@ import WorkoutCard from "@/components/common/WorkoutCard"
 
 
 const Profile = () => {
-  const { user } = useUser();
+  const { user, refreshUser } = useUser();
   const [userWorkouts, setUserWorkouts] = useState<Workout[]>([]);
   const [monthOrYear, setMonthOrYear] = useState('month');
   const [friendsData, setFriendsData] = useState<{following : string[], followers : string[]}>({following : [], followers : []});
@@ -25,6 +25,9 @@ const Profile = () => {
 
 
   useEffect(() => {
+
+    refreshUser(); // make sure everything up to date
+
     const fetchUserWorkouts = async () => {
       if (user) {
         const res = await getAllUserWorkouts(user.userId)
@@ -140,7 +143,7 @@ const Profile = () => {
           </div>
 
 
-          <div className="workouts-feed w-full flex h-[50vh] md:h-[80vh] mt-5 p-4 box-border border bg-teal-50 shadow-inner rounded-md">
+          <div className="workouts-feed w-full flex max-h-[50vh] md:h-[80vh] mt-5 p-4 box-border border bg-teal-50 shadow-inner rounded-md overflow-hidden">
             <div className="flex flex-col gap-4 w-full overflow-y-scroll">
               {userWorkouts?.map((workout, key) => (
                 <WorkoutCard

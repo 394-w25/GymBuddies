@@ -1,10 +1,10 @@
-export const fuzzySearch = (text, pattern) => {
+export const fuzzySearch = (text : string, pattern : string) => {
     const textLength = text.length;
     const patternLength = pattern.length;
 
     // Initialize the matrix
     const matrix = Array(patternLength + 1)
-        .fill()
+        .fill(0)
         .map(() => Array(textLength + 1).fill(0));
 
     for (let i = 0; i <= patternLength; i++) {

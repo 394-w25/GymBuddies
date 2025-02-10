@@ -106,7 +106,7 @@ const WorkoutCard = ({
   }
 
   return (
-    <Card className="overflow-hidden">
+    <Card className="">
       <CardHeader className="pb-6">
         {displayProfile && (
           <div

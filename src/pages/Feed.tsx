@@ -58,12 +58,12 @@ const Feed = () => {
 
   return (
     <Tabs defaultValue="public" className="w-full ">
-      <TabsList className=" grid w-[104%] -ml-[2%] md:w-[102%] md:-ml-[1%] grid-cols-2 bg-gray-200 sticky top-[74px] z-50 ">
+      <TabsList className=" grid grid-cols-2 bg-gray-200  z-50 ">
         <TabsTrigger value="public" >Public</TabsTrigger>
         <TabsTrigger value="following" >Following Only</TabsTrigger>
       </TabsList>
 
-      <TabsContent value='public'>
+      <TabsContent value='public' >
         <FeedWorkoutList workoutList={allWorkouts} />
       </TabsContent>
 

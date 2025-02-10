@@ -20,9 +20,9 @@ export const sortWorkouts = (workouts : Workout[]) => {
 
   });
 
-  for(const wkt of workouts) {
-    console.log(`${wkt.title} -- ${wkt.date}`);
-  }
+  // for(const wkt of workouts) {
+  //   console.log(`${wkt.title} -- ${wkt.date}`);
+  // }
   return workouts;
 }
 
@@ -95,8 +95,8 @@ export const addWorkout = async (userId: string, workout: WorkoutLog) => {
 
     await update(ref(database, `users/${userId}`), { workouts: userWorkouts })
 
-    console.log(`Workout ${workoutId} added for user ${userId}`)
-    console.log(`AND IT LOOKS LIKE : ${JSON.stringify(workout)}`)
+    // console.log(`Workout ${workoutId} added for user ${userId}`)
+    // console.log(`AND IT LOOKS LIKE : ${JSON.stringify(workout)}`)
 
     return workoutId;
   } catch (error) {
@@ -171,7 +171,7 @@ export const getWorkout = async (workoutId: string) => {
       const workoutData = snapshot.val()
       return workoutData as Workout
     } else {
-      console.log(`Could not find workout with id ${workoutId}`)
+      throw new Error("Could not find workout with this ID.")
       return {}
     }
   } catch (err) {
@@ -242,8 +242,7 @@ export const getAllWorkouts = async (): Promise<Workout[]> => {
 
       return sortWorkouts(workouts);
     } else {
-      console.log(`No workouts found in the database.`)
-      return []
+      throw new Error(`No workouts found in the database.`);
     }
   } catch (err) {
     console.error(`An error occurred while fetching all workouts:`, err)
@@ -334,39 +333,60 @@ export const addFriend = async (userId :string, friendId: string) => { // DEPREC
 
 }
 
-export const followUser = async (followerId : string, followedId : string) : Promise<boolean> => {
-
-  
+export const followUser = async (followerId: string, followedId: string): Promise<boolean> => {
   try {
-    // add following to follower's following list
-    get(ref(database, `users/${followerId}`)).then((data) => {
-      if(!data.exists()) {
-        throw new Error("Failed to get data about user trying to follow.")
+    // Helper function to normalize data into an array
+    const normalizeToArray = (data: any): string[] => {
+      if (data === undefined || data === null) {
+        return []; // Return an empty array if data is undefined or null
       }
+      if (typeof data === "object" && !Array.isArray(data)) {
+        // If data is an object (Firebase-style "array"), convert it to an array
+        return Object.values(data);
+      }
+      // If data is already an array, return it as-is
+      return Array.isArray(data) ? data : [data];
+    };
 
-      const followerUser = data.val();
-      update(ref(database, `user/${followerId}`), {following : ((followerUser.following !== undefined) ? [...followerUser.following, followedId] : [followedId])}); // make sure you can't re-follow in frontend implementation, not here ?
+    // add followed user to follower's following list
+    const followerData = await get(ref(database, `users/${followerId}`));
+    if (!followerData.exists()) {
+      throw new Error("Failed to get data about user trying to follow.");
+    }
+
+    const followerUser = followerData.val();
+    const updatedFollowing = normalizeToArray(followerUser.following);
+    if (!updatedFollowing.includes(followedId)) {
+      updatedFollowing.push(followedId); 
+    }
+
+    await update(ref(database, `users/${followerId}`), {
+      following: updatedFollowing,
     });
 
-    // add follower to followed's follower list
-    get(ref(database, `users/${followedId}`)).then((data) => {
-      if (!data.exists()) {
-        throw new Error("Failed to get data about user being followed");
-      }
+    // add follower to followed user's follower list
+    const followedData = await get(ref(database, `users/${followedId}`));
+    if (!followedData.exists()) {
+      throw new Error("Failed to get data about user being followed.");
+    }
 
-      const followedUser = data.val();
+    const followedUser = followedData.val();
+    const updatedFollowers = normalizeToArray(followedUser.followers);
+    if (!updatedFollowers.includes(followerId)) {
+      updatedFollowers.push(followerId);
+    }
 
-      update(ref(database, `users/${followedId}`), {followers : ((followedUser.followers !== undefined) ? [...followedUser.following, followerId] : [followerId])});
-    })
+    await update(ref(database, `users/${followedId}`), {
+      followers: updatedFollowers,
+    });
 
-    return true;
-
+    return true; 
+    
   } catch (err) {
-    console.log("ERROR ocurred during follow -- ", err);
+    console.log("ERROR occurred during follow -- ", err);
     return false;
   }
-
-}
+};
 
 export const getFollowersOfUser = async (userId : string) : Promise<string[] | undefined> => {
   try {
