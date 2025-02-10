@@ -1,11 +1,13 @@
 export interface User {
   userId: string
   name: string
-  email: string
+  email: string | null
   profilePic: string
-  friends: string[]
-  status: string
+  friends?: string[]
+  status: boolean | string
   bio: string
   streak: number
-  workouts: string[]
+  workouts?: string[]
+  following? : string[]
+  followers? : string[]
 }

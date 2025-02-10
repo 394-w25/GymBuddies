@@ -12,6 +12,7 @@ interface UserContextType {
   loading: boolean
   handleSignIn: () => Promise<boolean>
   handleSignOut: () => Promise<void>
+  refreshUser : () => Promise<void>
 }
 
 const UserContext = createContext<UserContextType>({
@@ -19,6 +20,7 @@ const UserContext = createContext<UserContextType>({
   loading: false,
   handleSignIn: async () => false,
   handleSignOut: async () => {},
+  refreshUser: async () => {},
 })
 
 // Hook for user context
@@ -36,7 +38,10 @@ const UserContextProvider = ({ children }: { children: ReactNode }) => {
         try {
           const profile = await getUser(firebaseUser.uid)
           if (profile) {
-            setUser(profile)
+
+            setUser(profile as User)
+            // console.log(`USER : ${JSON.stringify(profile)}`)
+
           } else {
             console.error("Could not fetch user profile, logging out")
             await handleSignOut()
@@ -53,6 +58,21 @@ const UserContextProvider = ({ children }: { children: ReactNode }) => {
 
     return unsubscribe
   }, [])
+
+  async function refreshUser() {
+    try {
+      if (!user) {
+        throw new Error("Cannot refresh without user already logged in.");
+      } else {
+        const u = await getUser(user.userId);
+        setUser(u as User);
+      }
+
+    } catch (err) {
+      console.error("Error fetching user profile:", err)
+      await handleSignOut()
+    }
+  }
 
   const handleSignIn = async () => {
     const userData = await signInWithGoogle()
@@ -79,6 +99,7 @@ const UserContextProvider = ({ children }: { children: ReactNode }) => {
         loading,
         handleSignIn,
         handleSignOut,
+        refreshUser,
       }}
     >
       {loading ? (

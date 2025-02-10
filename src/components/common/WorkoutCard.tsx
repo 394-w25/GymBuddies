@@ -57,7 +57,7 @@ const WorkoutCard = ({
     const getUserInfo = async () => {
       const user = await getUser(userId)
       if (user) {
-        setUser(user)
+        setUser(user as User)
       }
     }
 
@@ -97,7 +97,7 @@ const WorkoutCard = ({
   }
 
   return (
-    <Card>
+    <Card className="">
       <CardHeader className="pb-6">
         {displayProfile && (
           <div
@@ -124,17 +124,17 @@ const WorkoutCard = ({
       <Separator className="mb-6" />
       <CardContent>
         <div className="flex justify-between items-center gap-6 px-2 mb-6">
-          <div className="flex flex-col">
+          <div className="flex flex-col max-w-[32%] overflow-hidden">
             <h2 className="font-bold">Date</h2>
             <Moment format="M/D/YY">{workout.date}</Moment>
           </div>
-          <div className="flex flex-col">
+          <div className="flex flex-col max-w-[32%] overflow-hidden">
             <h2 className="font-bold">Duration</h2>
-            <p>{durationString}</p>
+            <p className="overflow-hidden overflow-ellipsis">{durationString}</p>
           </div>
-          <div className="flex flex-col">
+          <div className="flex flex-col max-w-[32%] overflow-hidden">
             <h2 className="font-bold">Volume</h2>
-            <p>{volumeString} lbs</p>
+            <p className="overflow-hidden overflow-ellipsis">{volumeString} lbs</p>
           </div>
         </div>
 
