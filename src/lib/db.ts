@@ -259,21 +259,28 @@ export const addFriend = async (userId: string, friendId: string) => {
 
   // right now just force both people to be friends
 
-  get(ref(database, `users/${friendId}`)).then((data) => {
-    if(!data.exists()) {
-      throw new Error("Failed to fetch friend from db :(");
-    } else {
-      const currFriend = data.val();
-      update(ref(database, `users/${friendId}`), {friends : ((currFriend.friends !== undefined) ? [...currFriend.friends, userId] : [userId] ) })
+  get(ref(database, `users/${friendId}`))
+    .then((data) => {
+      if (!data.exists()) {
+        throw new Error("Failed to fetch friend from db :(")
+      } else {
+        const currFriend = data.val()
+        update(ref(database, `users/${friendId}`), {
+          friends:
+            currFriend.friends !== undefined
+              ? [...currFriend.friends, userId]
+              : [userId],
+        })
+      }
+    })
+    .catch((err) => {
+      console.log(
+        `Could not complete friend add, likely could not find friend with friend id ${friendId}`,
+        err
+      )
+      return false
+    })
 
-    }
-  }).catch((err) => {
-    console.log(`Could not complete friend add, likely could not find friend with friend id ${friendId}`, err);
-    return false;
-  });
-
-  console.log(`successfully linked friends ${userId} and ${friendId}`);
-  return true;
-
+  console.log(`successfully linked friends ${userId} and ${friendId}`)
+  return true
 }
-
