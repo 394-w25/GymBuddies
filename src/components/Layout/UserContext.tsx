@@ -37,7 +37,6 @@ const UserContextProvider = ({ children }: { children: ReactNode }) => {
           const profile = await getUser(firebaseUser.uid)
           if (profile) {
             setUser(profile)
-            // console.log(`USER : ${JSON.stringify(profile)}`)
           } else {
             console.error("Could not fetch user profile, logging out")
             await handleSignOut()
