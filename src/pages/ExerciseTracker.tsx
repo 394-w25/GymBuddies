@@ -11,52 +11,31 @@ const ExerciseTracker = () => {
   const [userWorkouts, setUserWorkouts] = useState<Workout[] | null>([])
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
 
-  const fetchAndSetUserWorkouts = async () => {
-    if (user) {
-      const res = await getAllUserWorkouts(user.userId)
-      if (res) {
-        res.reverse()
-        console.log(res)
-        const sorted = sortWorkouts(res)
-        setUserWorkouts(sorted)
-      }
-    }
-  }
-
   useEffect(() => {
     const fetchUserWorkouts = async () => {
-      if (user) {
-        const res = await getAllUserWorkouts(user.userId)
-        if (res) {
-          res.reverse()
-          console.log(res)
-          const sorted = sortWorkouts(res)
-          setUserWorkouts(sorted)
-        }
+      if (!user) return
+
+      const res = await getAllUserWorkouts(user.userId)
+      if (res) {
+        setUserWorkouts(sortWorkouts(res))
       }
     }
 
     fetchUserWorkouts()
-
-    // Set up an interval to fetch every 10 seconds
-    const interval = setInterval(() => {
-      fetchUserWorkouts()
-    }, 8000)
-
-    // Clear the interval when the component unmounts
-    return () => clearInterval(interval)
   }, [user])
 
   const handleSaveWorkout = async (workout: WorkoutLog) => {
-    // Todo: Zero out seconds
-    // console.log(workout)
-    // console.log(`START : ${workout.startTime} -- END : ${workout.endTime} -- DATE : ${workout.date}`)
-    if (user && workout.exercises.length > 0) {
-      await addWorkout(user.userId, workout)
+    // Todo: Display error to user
+    if (!user || workout.exercises.length == 0) return
+
+    const res = await addWorkout(user.userId, workout)
+    if (res !== false && userWorkouts !== null) {
+      const newWorkouts: Workout[] = [
+        ...userWorkouts,
+        { ...workout, userId: user.userId, workoutId: res },
+      ]
+      setUserWorkouts(sortWorkouts(newWorkouts))
     }
-
-    fetchAndSetUserWorkouts();
-
   }
 
   return (

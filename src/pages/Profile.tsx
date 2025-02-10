@@ -1,6 +1,4 @@
-import WeightliftingChart from "@/components/Profile/WeightliftingChart"
 import { useUser } from "@/components/Layout/UserContext"
-import { getPoundsPerPeriod, WeightData } from "@/lib/count_workouts"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
@@ -90,10 +88,8 @@ const Profile = () => {
 
 
 
-
-
   return (
-    <div className="w-full">
+    <>
       {user && (
         <div className="flex flex-col items-center w-full">
           <div className="profile-pic-and-name flex flex-col items-center">
@@ -167,7 +163,7 @@ const Profile = () => {
           </h2>
         </div>
       )}
-    </div>
+    </>
   )
 }
 

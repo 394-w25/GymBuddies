@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { getAllWorkouts, sortWorkouts, getWorkoutsOfFollowing } from "@/lib/db"
+import WorkoutCard from "@/components/common/WorkoutCard"
 import type { Workout } from "@/types/workout"
 import FeedWorkoutList from "@/components/Feed/FeedWorkoutList"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -33,6 +34,7 @@ const Feed = () => {
 
     // Clear the interval when the component unmounts
     return () => clearInterval(interval)
+
   }, [])
 
   useEffect(() => {
