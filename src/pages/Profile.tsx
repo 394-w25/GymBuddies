@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Button } from "@/components/ui/button"
 import { useEffect, useState } from "react"
 import {
   getAllUserWorkouts,
@@ -27,7 +28,7 @@ import WeightliftingChart from "@/components/Profile/WeightliftingChart"
 import { getPoundsPerPeriod } from "@/lib/count_workouts"
 
 const Profile = () => {
-  const { user, refreshUser } = useUser()
+  const { user, refreshUser, handleSignIn } = useUser()
   const [userWorkouts, setUserWorkouts] = useState<Workout[]>([])
   const [monthOrYear, setMonthOrYear] = useState("month")
   const [friendsData, setFriendsData] = useState<{
@@ -36,46 +37,48 @@ const Profile = () => {
   }>({ following: [], followers: [] })
 
   useEffect(() => {
-    refreshUser() // make sure everything up to date
+    if (user) {
+      refreshUser() // make sure everything up to date
 
-    const fetchUserWorkouts = async () => {
-      if (user) {
-        const res = await getAllUserWorkouts(user.userId)
-        if (res) {
-          res.reverse()
-          console.log(res)
-          const sorted = sortWorkouts(res)
-          setUserWorkouts(sorted)
+      const fetchUserWorkouts = async () => {
+        if (user) {
+          const res = await getAllUserWorkouts(user.userId)
+          if (res) {
+            res.reverse()
+            console.log(res)
+            const sorted = sortWorkouts(res)
+            setUserWorkouts(sorted)
+          }
         }
       }
-    }
 
-    const fetchUserFollowersFollowing = async () => {
-      if (user) {
-        const [followersList, followingList] = await Promise.all([
-          getFollowersOfUser(user.userId),
-          getFollowingOfUser(user.userId),
-        ])
+      const fetchUserFollowersFollowing = async () => {
+        if (user) {
+          const [followersList, followingList] = await Promise.all([
+            getFollowersOfUser(user.userId),
+            getFollowingOfUser(user.userId),
+          ])
 
-        console.log(
-          `FOLLOWERS : ${followersList} -- FOLLOWING : ${followingList}`
-        )
+          console.log(
+            `FOLLOWERS : ${followersList} -- FOLLOWING : ${followingList}`
+          )
 
-        if (followersList !== undefined && followingList !== undefined) {
-          setFriendsData((prev) => {
-            return {
-              ...prev,
-              following: followingList as string[],
-              followers: followersList as string[],
-            }
-          })
+          if (followersList !== undefined && followingList !== undefined) {
+            setFriendsData((prev) => {
+              return {
+                ...prev,
+                following: followingList as string[],
+                followers: followersList as string[],
+              }
+            })
+          }
         }
       }
-    }
 
-    fetchUserFollowersFollowing()
-    fetchUserWorkouts()
-  }, [user])
+      fetchUserFollowersFollowing()
+      fetchUserWorkouts()
+    }
+  }, [user, refreshUser])
 
   return (
     <>
@@ -155,10 +158,11 @@ const Profile = () => {
       )}
 
       {!user && (
-        <div className="w-full min-h-[200px] flex flex-col justify-center items-center">
+        <div className="w-full min-h-[200px] gap-3 flex flex-col justify-center items-center">
           <h2 className="text-center text-2xl font-semibold">
-            Please log in to see workout data!
+            Sign in to access your profile
           </h2>
+          <Button onClick={handleSignIn}>Sign In</Button>
         </div>
       )}
     </>

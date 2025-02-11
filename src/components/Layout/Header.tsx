@@ -19,7 +19,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { LogOut, Dumbbell } from "lucide-react"
+import { LogOut, Dumbbell, UserCircle2 } from "lucide-react"
 import SearchCard from "../common/SearchCard"
 import { useEffect, useState } from "react"
 import { User } from "@/types/user"
@@ -33,7 +33,6 @@ const Header = () => {
   useEffect(() => {
     const fetchKnownUsers = async () => {
       const users = await getAllUsers()
-      // console.log(`KNOWN USERS : \n${JSON.stringify(users)}`);
       setKnownUsers(users)
     }
 
@@ -58,7 +57,10 @@ const Header = () => {
         <h1 className="text-2xl font-bold text-primary">GymBuddies</h1>
       </div>
       {!user ? (
-        <Button onClick={handleSignIn}>Login</Button>
+        <Button onClick={handleSignIn}>
+          <UserCircle2 />
+          Login
+        </Button>
       ) : (
         <div className="search-and-user-buttons flex gap-4">
           <SearchCard currentKnownUsers={Object.values(knownUsers)} />
