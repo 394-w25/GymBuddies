@@ -257,48 +257,6 @@ export const getAllUserWorkouts = async (
   }
 }
 
-export const getWorkoutsOfFollowing = async (
-  userId: string
-): Promise<Workout[] | []> => {
-  // userId refers to the user who wants to see the workouts of people they follow....
-
-  try {
-    const [userFollowing, workouts] = await Promise.all([
-      getFollowingOfUser(userId),
-      getAllWorkouts(),
-    ])
-    if (
-      userFollowing === undefined ||
-      userFollowing.length === 0 ||
-      !workouts ||
-      workouts.length === 0
-    ) {
-      // if any of these guys fail just return nothing
-      throw new Error(
-        "Workouts or Following returned an invalid value (undefined, null, or [])"
-      )
-    }
-
-    const followingWorkouts = []
-
-    for (const wkt of workouts) {
-      if (userFollowing.includes(wkt.userId)) {
-        followingWorkouts.push(wkt)
-      }
-    }
-
-    return followingWorkouts as Workout[]
-  } catch (err) {
-    console.log(
-      "An error ocurred while trying to fetch the workouts of followed users for user ",
-      userId,
-      " : ",
-      err
-    )
-    return []
-  }
-}
-
 // Follow Functions
 export const followUser = async (
   followerId: string,

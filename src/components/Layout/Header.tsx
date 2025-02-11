@@ -1,5 +1,5 @@
 import { useUser } from "./UserContext"
-import {useNavigate} from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -28,28 +28,32 @@ import { getAllUsers } from "@/lib/db"
 const Header = () => {
   const { user, handleSignIn, handleSignOut } = useUser()
   const navigate = useNavigate()
-  const [knownUsers, setKnownUsers] = useState<User[]>([]);
+  const [knownUsers, setKnownUsers] = useState<User[]>([])
 
   useEffect(() => {
     const fetchKnownUsers = async () => {
-      const users =  await getAllUsers();
+      const users = await getAllUsers()
       // console.log(`KNOWN USERS : \n${JSON.stringify(users)}`);
-      setKnownUsers(users);
+      setKnownUsers(users)
     }
 
-    fetchKnownUsers();
+    fetchKnownUsers()
 
     const interval = setInterval(() => {
-      fetchKnownUsers();
+      fetchKnownUsers()
     }, 60000) // once per minute
 
-    return () => clearInterval(interval);
-
+    return () => clearInterval(interval)
   }, [user])
 
   return (
     <header className="flex justify-between items-center py-4 px-6 bg-white shadow-sm sticky top-0 z-50 h-[75px]">
-      <div className="flex items-center justify-center gap-2 cursor-pointer" onClick={() => {navigate('/')}}>
+      <div
+        className="flex items-center justify-center gap-2 cursor-pointer"
+        onClick={() => {
+          navigate("/")
+        }}
+      >
         <Dumbbell />
         <h1 className="text-2xl font-bold text-primary">GymBuddies</h1>
       </div>
@@ -57,9 +61,7 @@ const Header = () => {
         <Button onClick={handleSignIn}>Login</Button>
       ) : (
         <div className="search-and-user-buttons flex gap-4">
-
-          <SearchCard currentKnownUsers={Object.values(knownUsers)}/>
-
+          <SearchCard currentKnownUsers={Object.values(knownUsers)} />
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -72,7 +74,7 @@ const Header = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <AlertDialog>
-                <AlertDialogTrigger>
+                <AlertDialogTrigger className="w-full">
                   <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                     <LogOut />
                     <span>Log out</span>
@@ -89,8 +91,7 @@ const Header = () => {
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction
                       onClick={async () => {
-                        await handleSignOut()
-                        navigate("/")
+                        await handleSignOut().then(() => navigate("/"))
                       }}
                     >
                       Sign Out

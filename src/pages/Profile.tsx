@@ -1,33 +1,42 @@
 import { useUser } from "@/components/Layout/UserContext"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { useEffect, useState } from "react"
-import { getAllUserWorkouts, sortWorkouts, getFollowersOfUser, getFollowingOfUser } from "@/lib/db"
+import {
+  getAllUserWorkouts,
+  sortWorkouts,
+  getFollowersOfUser,
+  getFollowingOfUser,
+} from "@/lib/db"
 import { Workout } from "@/types/workout"
-import WorkoutCard from "@/components/common/WorkoutCard"
 import WeightliftingChart from "@/components/Profile/WeightliftingChart"
 import { getPoundsPerPeriod } from "@/lib/count_workouts"
 
-
-
-
 const Profile = () => {
-  const { user, refreshUser } = useUser();
-  const [userWorkouts, setUserWorkouts] = useState<Workout[]>([]);
-  const [monthOrYear, setMonthOrYear] = useState('month');
-  const [friendsData, setFriendsData] = useState<{following : string[], followers : string[]}>({following : [], followers : []});
-  // console.log(`bio : ${user.bio}`);
-  // const [weightData, setWeightData] = useState<WeightData[]>([]);
-  // const [weeks, months] = getPoundsPerPeriod(userWorkouts, (new Date()).getMonth());
-  // console.log(`weeks : ${JSON.stringify(weeks)}`)
-  // setWeightData(weeks);
-
+  const { user, refreshUser } = useUser()
+  const [userWorkouts, setUserWorkouts] = useState<Workout[]>([])
+  const [monthOrYear, setMonthOrYear] = useState("month")
+  const [friendsData, setFriendsData] = useState<{
+    following: string[]
+    followers: string[]
+  }>({ following: [], followers: [] })
 
   useEffect(() => {
-
-    refreshUser(); // make sure everything up to date
+    refreshUser() // make sure everything up to date
 
     const fetchUserWorkouts = async () => {
       if (user) {
@@ -41,56 +50,32 @@ const Profile = () => {
       }
     }
 
-
-    // Set up an interval to fetch every 10 seconds
-    // const interval = setInterval(() => {
-    //   fetchUserWorkouts()
-    // }, 8000)
-
-    // // Clear the interval when the component unmounts
-    // return () => clearInterval(interval)
-
     const fetchUserFollowersFollowing = async () => {
       if (user) {
+        const [followersList, followingList] = await Promise.all([
+          getFollowersOfUser(user.userId),
+          getFollowingOfUser(user.userId),
+        ])
 
-        const [followersList, followingList] = await Promise.all(
-          [
-            getFollowersOfUser(user.userId),
-            getFollowingOfUser(user.userId)
-          ]
-        );
-
-        console.log(`FOLLOWERS : ${followersList} -- FOLLOWING : ${followingList}`);
+        console.log(
+          `FOLLOWERS : ${followersList} -- FOLLOWING : ${followingList}`
+        )
 
         if (followersList !== undefined && followingList !== undefined) {
           setFriendsData((prev) => {
-              return {
-                ...prev,
-                following : followingList as string[],
-                followers : followersList as string[],
-              }
+            return {
+              ...prev,
+              following: followingList as string[],
+              followers: followersList as string[],
             }
-          )
+          })
         }
-         
       }
     }
 
-    fetchUserFollowersFollowing();
+    fetchUserFollowersFollowing()
     fetchUserWorkouts()
-
-
   }, [user])
-
-
-  // useEffect(() => {
-  //   const [weeks, months] = getPoundsPerPeriod(userWorkouts, (new Date()).getMonth());
-  //   console.log(`weeks : ${JSON.stringify(weeks)}`)
-  //   setWeightData(weeks);
-
-  // }, [userWorkouts])
-
-
 
   return (
     <>
@@ -102,13 +87,24 @@ const Profile = () => {
               <AvatarFallback>{user.name.at(0)}</AvatarFallback>
             </Avatar>
             <h1 className="text-2xl font-bold">{user.name}</h1>
-            {user.bio && <p className="text-gray-600 w-[80%] my-4">{user.bio}</p>}
+            {user.bio && (
+              <p className="text-gray-600 w-[80%] my-4">{user.bio}</p>
+            )}
 
             {/* FOLLOWERS AND FOLLOWING */}
             <div className="follower-following flex flex-row w-full gap-10 justify-center items-center">
-              <p className=""><span className="font-bold">{friendsData.followers.length}</span> Followers</p>
-              <p className=""><span className="font-bold">{friendsData.following.length}</span> Following</p>
-
+              <p className="">
+                <span className="font-bold">
+                  {friendsData.followers.length}
+                </span>{" "}
+                Followers
+              </p>
+              <p className="">
+                <span className="font-bold">
+                  {friendsData.following.length}
+                </span>{" "}
+                Following
+              </p>
             </div>
           </div>
 
@@ -118,7 +114,9 @@ const Profile = () => {
                 <div className="flex flex-col md:flex-row w-full justify-between">
                   <div>
                     <CardTitle>Strength Tracker</CardTitle>
-                    <CardDescription>Track your progress, watch your growth.</CardDescription>
+                    <CardDescription>
+                      Track your progress, watch your growth.
+                    </CardDescription>
                   </div>
 
                   <div className="mt-3 md:mt-0">
@@ -137,25 +135,21 @@ const Profile = () => {
               </CardHeader>
 
               <CardContent className="w-full h-full flex flex-col ">
-                <WeightliftingChart data={((monthOrYear==='month') ? getPoundsPerPeriod(userWorkouts, (new Date()).getMonth())[0] : getPoundsPerPeriod(userWorkouts, (new Date()).getMonth())[1])} />
+                <WeightliftingChart
+                  data={
+                    monthOrYear === "month"
+                      ? getPoundsPerPeriod(
+                          userWorkouts,
+                          new Date().getMonth()
+                        )[0]
+                      : getPoundsPerPeriod(
+                          userWorkouts,
+                          new Date().getMonth()
+                        )[1]
+                  }
+                />
               </CardContent>
             </Card>
-          </div>
-
-
-          <div className="workouts-feed w-full flex max-h-[50vh] md:h-[80vh] mt-5 p-4 box-border border bg-teal-50 shadow-inner rounded-md overflow-hidden">
-            <div className="flex flex-col gap-4 w-full overflow-y-scroll">
-              {userWorkouts?.map((workout, key) => (
-                <WorkoutCard
-                  key={key}
-                  userId={workout.userId}
-                  workout={workout}
-                  username={user.name}
-                  profilePic={user.profilePic}
-                  displayProfile={false}
-                />
-              ))}
-            </div>
           </div>
         </div>
       )}
