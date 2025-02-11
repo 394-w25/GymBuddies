@@ -70,7 +70,7 @@ const Header = () => {
               <Avatar>
                 <AvatarImage src={user.profilePic} alt={user.name} />
                 <AvatarFallback>
-                  {user.name.charAt(0).toUpperCase()}
+                  {user.name?.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
             </DropdownMenuTrigger>

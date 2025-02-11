@@ -51,11 +51,11 @@ export const getUser = async (userId: string) => {
       return snapshot.val() as User
     } else {
       console.log(`Could not find user with id ${userId}`)
-      return {}
+      return null
     }
   } catch (err) {
     console.log(`An error occurred while trying to get user ${userId}:`, err)
-    return {}
+    return null
   }
 }
 
