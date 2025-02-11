@@ -29,7 +29,7 @@ const ExerciseTracker = () => {
         const res = await getAllUserWorkouts(user.userId)
         if (res) {
           res.reverse()
-          console.log(res)
+          //console.log(res)
           const sorted = sortWorkouts(res)
           setUserWorkouts(sorted)
         }
