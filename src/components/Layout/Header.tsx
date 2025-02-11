@@ -33,6 +33,7 @@ const Header = () => {
   useEffect(() => {
     const fetchKnownUsers = async () => {
       const users =  await getAllUsers();
+      // console.log(`KNOWN USERS : \n${JSON.stringify(users)}`);
       setKnownUsers(users);
     }
 

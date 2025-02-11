@@ -41,6 +41,9 @@ function unmemoedSearchCard({currentKnownUsers}: Props) {
 
         if(search_term.length > 2) {
             for (let user of currentKnownUsers) {
+                if (!user.name) {
+                    continue;
+                }
                 const diff_and_dist = fuzzySearch( user.name.toLowerCase() , search_term);
                 const score = diff_and_dist.distance + Math.abs(diff_and_dist.position);
 
@@ -57,6 +60,9 @@ function unmemoedSearchCard({currentKnownUsers}: Props) {
         } else {
 
             for (let user of currentKnownUsers) {
+                if (!user.name) {
+                    continue;
+                }
                 if(user.name.toLowerCase().startsWith(search_term)) {
                     users_and_scores.push(user as User);
                     // console.log(user.name);

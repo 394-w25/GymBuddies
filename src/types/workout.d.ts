@@ -17,7 +17,7 @@ export interface WorkoutLog {
   startTime: Date
   endTime: Date
   exercises: Exercise[]
-  reactionCount: number
+  reactionCount?: number
 }
 
 export interface Workout extends WorkoutLog {
