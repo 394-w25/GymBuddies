@@ -17,10 +17,10 @@ export interface WorkoutLog {
   startTime: Date
   endTime: Date
   exercises: Exercise[]
-  reactionCount?: number
 }
 
 export interface Workout extends WorkoutLog {
   workoutId: string
   userId: string
+  likes: string[]
 }

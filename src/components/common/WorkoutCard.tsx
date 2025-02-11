@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react"
-import { getUser } from "@/lib/db"
 import {
-  calculateWorkoutVolume,
-  getBestSet,
-} from "@/lib/utils"
+  getUser,
+  likeWorkout,
+  unlikeWorkout,
+  listenToWorkoutLikes,
+} from "@/lib/db"
+import { calculateWorkoutVolume, getBestSet } from "@/lib/utils"
+import { useUser } from "@/components/Layout/UserContext"
 import Moment from "react-moment"
 import { ChevronsUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -22,7 +25,6 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
 import { FaHeart } from "react-icons/fa"
-import { recordReaction } from "../../lib/reactions"
 
 import type { Exercise, Workout } from "@/types/workout"
 import type { User } from "@/types/user"
@@ -55,51 +57,75 @@ const WorkoutCard = ({
   profilePic,
   displayProfile = true,
 }: WorkoutCardProps) => {
+  const { user } = useUser()
+
   const [isOpen, setIsOpen] = useState<boolean>(false)
-  const [user, setUser] = useState<User | null>()
+  const [cardUser, setCardUser] = useState<User | null>()
+  const [likeCount, setLikeCount] = useState<number>(workout.likes?.length || 0)
+  const [isLiked, setIsLiked] = useState<boolean>(true)
 
   useEffect(() => {
     const getUserInfo = async () => {
-      const user = await getUser(userId)
-      if (user) {
-        setUser(user as User)
+      const cardUserProfile = await getUser(userId)
+      if (cardUserProfile) {
+        setCardUser(cardUserProfile as User)
       }
     }
 
     getUserInfo()
   }, [userId])
 
-  const getMinutes = () => {
-    const start = new Date(workout.startTime).getTime();
-    const end = new Date(workout.endTime).getTime();
+  useEffect(() => {
+    if (user) {
+      setIsLiked(workout.likes?.includes(user.userId))
+    }
+  }, [user, workout.likes])
 
-    const minutes = (end - start) / (1000 * 60);
-    return minutes;
+  useEffect(() => {
+    const unsubscribe = listenToWorkoutLikes(workout.workoutId, (likes) => {
+      setLikeCount(likes.length)
+    })
+
+    return () => unsubscribe()
+  }, [workout.workoutId])
+
+  const handleReaction = async () => {
+    if (!user) return
+
+    if (isLiked) {
+      setLikeCount((prev) => prev - 1)
+      setIsLiked(false)
+
+      try {
+        await unlikeWorkout(workout.workoutId, userId)
+      } catch (error) {
+        console.error("Failed to record reaction", error)
+        setLikeCount((prev) => prev + 1)
+        setIsLiked(true)
+      }
+    } else {
+      setLikeCount((prev) => prev + 1)
+      setIsLiked(true)
+
+      try {
+        await likeWorkout(workout.workoutId, userId)
+      } catch (error) {
+        console.error("Failed to record reaction", error)
+        setLikeCount((prev) => prev - 1)
+        setIsLiked(false)
+      }
+    }
   }
 
-  const durationInMinutes = getMinutes();
+  const getMinutes = () => {
+    const start = new Date(workout.startTime).getTime()
+    const end = new Date(workout.endTime).getTime()
 
-  // const durationInMinutes = calculateMinutesBetweenDates(
-  //   workout.startTime,
-  //   workout.endTime
-  // )
+    const minutes = (end - start) / (1000 * 60)
+    return minutes
+  }
 
-  const [reactionCount, setReactionCount] = useState<number>(workout.reactionCount || 0);
-  const [hasReacted, setHasReacted] = useState<boolean>(false);
-  const handleReaction = async () => {
-    if (hasReacted) return;
-    setReactionCount((prev) => prev + 1);
-    setHasReacted(true);
-  
-    try {
-      await recordReaction(workout.workoutId, userId);
-    } catch (error) {
-      console.error("Failed to record reaction", error);
-      setReactionCount((prev) => prev - 1);
-      setHasReacted(false);
-    }
-  };
-
+  const durationInMinutes = getMinutes()
   const volume = calculateWorkoutVolume(workout.exercises)
 
   let durationString
@@ -133,12 +159,14 @@ const WorkoutCard = ({
           >
             <div className="flex justify-center items-center gap-2">
               <Avatar>
-                <AvatarImage src={profilePic || user?.profilePic} />
+                <AvatarImage src={profilePic || cardUser?.profilePic} />
                 <AvatarFallback>
-                  {username?.at(0) || user?.name.at(0)}
+                  {username?.at(0) || cardUser?.name.at(0)}
                 </AvatarFallback>
               </Avatar>
-              <h1 className="font-bold text-xl">{username || user?.name}</h1>
+              <h1 className="font-bold text-xl">
+                {username || cardUser?.name}
+              </h1>
             </div>
           </div>
         )}
@@ -156,11 +184,15 @@ const WorkoutCard = ({
           </div>
           <div className="flex flex-col max-w-[32%] overflow-hidden">
             <h2 className="font-bold">Duration</h2>
-            <p className="overflow-hidden overflow-ellipsis">{durationString}</p>
+            <p className="overflow-hidden overflow-ellipsis">
+              {durationString}
+            </p>
           </div>
           <div className="flex flex-col max-w-[32%] overflow-hidden">
             <h2 className="font-bold">Volume</h2>
-            <p className="overflow-hidden overflow-ellipsis">{volumeString} lbs</p>
+            <p className="overflow-hidden overflow-ellipsis">
+              {volumeString} lbs
+            </p>
           </div>
         </div>
 
@@ -173,7 +205,11 @@ const WorkoutCard = ({
 
         {workout.exercises.length > 1 && (
           <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-            <CollapsibleContent className={"text-popover-foreground outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"}>
+            <CollapsibleContent
+              className={
+                "text-popover-foreground outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"
+              }
+            >
               <div className="flex flex-col mb-1">
                 {workout.exercises.slice(1).map((exercise, key) => (
                   <ExerciseRow exercise={exercise} key={key} />
@@ -192,9 +228,17 @@ const WorkoutCard = ({
         )}
         {/* Reaction Button Section */}
         <div className="flex justify-end mt-4">
-          <Button variant="outline" onClick={handleReaction} disabled={hasReacted}>
-            <FaHeart className="mr-2 text-red-500" />
-            {reactionCount}
+          <Button
+            className="hover:bg-transparent"
+            variant="outline"
+            onClick={handleReaction}
+          >
+            <FaHeart
+              className={`mr-1 ${
+                isLiked && user ? "text-red-500" : "text-gray-400"
+              }`}
+            />
+            {likeCount}
           </Button>
         </div>
       </CardContent>

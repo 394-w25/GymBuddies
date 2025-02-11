@@ -32,7 +32,7 @@ const ExerciseTracker = () => {
     if (res !== false && userWorkouts !== null) {
       const newWorkouts: Workout[] = [
         ...userWorkouts,
-        { ...workout, userId: user.userId, workoutId: res },
+        { ...workout, userId: user.userId, workoutId: res, likes: [] },
       ]
       setUserWorkouts(sortWorkouts(newWorkouts))
     }

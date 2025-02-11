@@ -73,13 +73,12 @@ export function WorkoutLogModal({
 
   const handleSave = () => {
     onSave({
-      date : new Date(),
+      date: new Date(),
       startTime,
       endTime,
       exercises,
       title,
       caption,
-      reactionCount: 0,
     })
     resetModal()
   }
@@ -168,8 +167,8 @@ export function WorkoutLogModal({
                   <TimePicker
                     date={startTime}
                     setDate={(date) => {
-                      if (date !== undefined) setStartTime(date);
-                      console.log("setting date : ", date);
+                      if (date !== undefined) setStartTime(date)
+                      console.log("setting date : ", date)
                     }}
                     showSeconds={false}
                   />

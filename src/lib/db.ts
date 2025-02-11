@@ -14,11 +14,12 @@ export const addUser = async (user: FirebaseUser) => {
     name: displayName || "",
     email: email || "",
     profilePic: photoURL || "",
-    friends: [],
     status: false,
     bio: "",
     streak: 0,
     workouts: [],
+    following: [],
+    followers: [],
   }
 
   try {
@@ -89,7 +90,7 @@ export const addWorkout = async (userId: string, workout: WorkoutLog) => {
     startTime: workout.startTime.getTime(),
     endTime: workout.endTime.getTime(),
     exercises: workout.exercises,
-    reactionCount: 0,
+    likes: [],
   }
 
   try {
@@ -118,7 +119,7 @@ export const updateWorkout = async (
   workout: WorkoutLog
 ) => {
   if (workout.endTime) {
-    const workoutData: Workout = {
+    const workoutData = {
       workoutId,
       userId: userId,
       title: workout.title,
@@ -127,7 +128,6 @@ export const updateWorkout = async (
       startTime: workout.startTime,
       endTime: workout.endTime,
       exercises: workout.exercises,
-      reactionCount: workout.reactionCount,
     }
 
     try {
@@ -255,6 +255,82 @@ export const getAllUserWorkouts = async (
     )
     return null
   }
+}
+
+export const likeWorkout = async (
+  workoutId: string,
+  reactorId: string
+): Promise<boolean> => {
+  try {
+    const workoutRef = ref(database, `workouts/${workoutId}`)
+
+    const snapshot = await get(workoutRef)
+    if (!snapshot.exists()) {
+      throw new Error("Workout does not exist!")
+    }
+
+    const workoutData = snapshot.val() as Workout
+    const newLikes =
+      workoutData.likes != undefined
+        ? [...workoutData.likes.filter((uid) => uid !== reactorId), reactorId]
+        : [reactorId]
+
+    await update(workoutRef, {
+      likes: newLikes,
+    })
+
+    return true
+  } catch (err) {
+    console.log("Error liking workout:", err)
+    return false
+  }
+}
+
+export const unlikeWorkout = async (
+  workoutId: string,
+  reactorId: string
+): Promise<boolean> => {
+  try {
+    const workoutRef = ref(database, `workouts/${workoutId}`)
+
+    const snapshot = await get(workoutRef)
+    if (!snapshot.exists()) {
+      throw new Error("Workout does not exist!")
+    }
+
+    const workoutData = snapshot.val() as Workout
+    const likes = workoutData.likes
+
+    if (likes.includes(reactorId)) {
+      await update(workoutRef, {
+        likes: likes.filter((uid) => uid !== reactorId),
+      })
+    }
+
+    return true
+  } catch (err) {
+    console.log("Error liking workout:", err)
+    return false
+  }
+}
+
+export const listenToWorkoutLikes = (
+  workoutId: string,
+  callback: (likes: string[]) => void
+) => {
+  const likesRef = ref(database, `workouts/${workoutId}/likes`)
+
+  const listener = onValue(likesRef, (snapshot) => {
+    if (snapshot.exists()) {
+      const likes = snapshot.val()
+      callback(likes)
+    } else {
+      callback([])
+    }
+  })
+
+  // Return unsubscribe function
+  return () => off(likesRef, "value", listener)
 }
 
 // Follow Functions
