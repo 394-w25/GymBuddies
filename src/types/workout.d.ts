@@ -23,4 +23,5 @@ export interface Workout extends WorkoutLog {
   workoutId: string
   userId: string
   likes: string[]
+  comments: string[]
 }
