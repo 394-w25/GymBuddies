@@ -74,11 +74,16 @@ const ExerciseTracker = () => {
       )}
 
       {!user && (
-        <div className="w-full min-h-[200px] gap-3 flex flex-col justify-center items-center">
-          <h2 className="text-center text-2xl font-semibold">
-            Sign in to access your workout tracker
-          </h2>
-          <Button onClick={handleSignIn}>Sign In</Button>
+        <div className="empty-following-message flex flex-col items-center justify-center mt-24">
+          <h1 className="text-center text-4xl font-bold mb-3 text-gray-500">
+            You're almost there
+          </h1>
+          <p className="text-center text-xl text-gray-400">
+            Please sign in to access your workouts!
+          </p>
+          <Button className="mt-4" onClick={handleSignIn}>
+            Sign In
+          </Button>
         </div>
       )}
     </>

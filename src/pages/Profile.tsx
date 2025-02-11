@@ -158,11 +158,19 @@ const Profile = () => {
       )}
 
       {!user && (
-        <div className="w-full min-h-[200px] gap-3 flex flex-col justify-center items-center">
-          <h2 className="text-center text-2xl font-semibold">
-            Sign in to access your profile
-          </h2>
-          <Button onClick={handleSignIn}>Sign In</Button>
+        <div className="empty-following-message flex flex-col items-center justify-center mt-24">
+          <h1 className="text-center text-4xl font-bold mb-3 text-gray-500">
+            Who's this?
+          </h1>
+          <p className="text-center text-xl text-gray-400">
+            Please sign in to access your profile!
+          </p>
+          <Button className="mt-4" onClick={handleSignIn}>
+            Sign In
+          </Button>
+          <p className="text-center italic text-sm mt-3 text-gray-300">
+            No seriously, who are you...
+          </p>
         </div>
       )}
     </>
