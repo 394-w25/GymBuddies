@@ -73,6 +73,7 @@ export const addWorkout = async (userId: string, workout: WorkoutLog) => {
     startTime: workout.startTime,
     endTime: workout.endTime,
     exercises: workout.exercises,
+    reactionCount: 0,
   }
 
   const workoutDataAdjustForDates = {
@@ -118,6 +119,7 @@ export const updateWorkout = async (userId : string, workoutId : string, workout
       startTime: workout.startTime,
       endTime: workout.endTime,
       exercises: workout.exercises,
+      reactionCount: workout.reactionCount,
     }
 
     try {

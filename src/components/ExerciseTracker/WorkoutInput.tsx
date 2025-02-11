@@ -79,6 +79,7 @@ export function WorkoutLogModal({
       exercises,
       title,
       caption,
+      reactionCount: 0,
     })
     resetModal()
   }

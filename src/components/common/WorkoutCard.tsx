@@ -21,6 +21,8 @@ import {
 } from "@/components/ui/collapsible"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
+import { FaHeart } from "react-icons/fa"
+import { recordReaction } from "../../lib/reactions"
 
 import type { Exercise, Workout } from "@/types/workout"
 import type { User } from "@/types/user"
@@ -81,6 +83,22 @@ const WorkoutCard = ({
   //   workout.startTime,
   //   workout.endTime
   // )
+
+  const [reactionCount, setReactionCount] = useState<number>(workout.reactionCount || 0);
+  const [hasReacted, setHasReacted] = useState<boolean>(false);
+  const handleReaction = async () => {
+    if (hasReacted) return;
+    setReactionCount((prev) => prev + 1);
+    setHasReacted(true);
+  
+    try {
+      await recordReaction(workout.workoutId, userId);
+    } catch (error) {
+      console.error("Failed to record reaction", error);
+      setReactionCount((prev) => prev - 1);
+      setHasReacted(false);
+    }
+  };
 
   const volume = calculateWorkoutVolume(workout.exercises)
 
@@ -172,6 +190,13 @@ const WorkoutCard = ({
             </CollapsibleTrigger>
           </Collapsible>
         )}
+        {/* Reaction Button Section */}
+        <div className="flex justify-end mt-4">
+          <Button variant="outline" onClick={handleReaction} disabled={hasReacted}>
+            <FaHeart className="mr-2 text-red-500" />
+            {reactionCount}
+          </Button>
+        </div>
       </CardContent>
     </Card>
   )
