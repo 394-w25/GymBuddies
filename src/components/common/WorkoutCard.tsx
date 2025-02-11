@@ -97,7 +97,7 @@ const WorkoutCard = ({
       setIsLiked(false)
 
       try {
-        await unlikeWorkout(workout.workoutId, userId)
+        await unlikeWorkout(workout.workoutId, user.userId)
       } catch (error) {
         console.error("Failed to record reaction", error)
         setLikeCount((prev) => prev + 1)
@@ -108,7 +108,7 @@ const WorkoutCard = ({
       setIsLiked(true)
 
       try {
-        await likeWorkout(workout.workoutId, userId)
+        await likeWorkout(workout.workoutId, user.userId)
       } catch (error) {
         console.error("Failed to record reaction", error)
         setLikeCount((prev) => prev - 1)
