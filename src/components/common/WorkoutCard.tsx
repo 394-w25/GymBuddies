@@ -8,7 +8,7 @@ import {
 import { calculateWorkoutVolume, getBestSet } from "@/lib/utils"
 import { useUser } from "@/components/Layout/UserContext"
 import Moment from "react-moment"
-import { ChevronsUpDown, MessageCircle } from "lucide-react"
+import { ChevronsUpDown, MessageCircle, Trash } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -22,6 +22,17 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
 import { FaHeart } from "react-icons/fa"
@@ -49,7 +60,9 @@ interface WorkoutCardProps {
   profilePic?: string
   displayProfile?: boolean
   displayComments?: boolean
+  displayDelete?: boolean
   openComments?: (workout: Workout) => void
+  onDelete?: () => void
 }
 
 const WorkoutCard = ({
@@ -59,7 +72,9 @@ const WorkoutCard = ({
   profilePic,
   displayComments = true,
   displayProfile = true,
+  displayDelete = false,
   openComments,
+  onDelete,
 }: WorkoutCardProps) => {
   const { user } = useUser()
 
@@ -231,32 +246,57 @@ const WorkoutCard = ({
           </Collapsible>
         )}
         {/* Reaction Button Section */}
-        <div className="flex justify-end mt-4 gap-1">
-          <Button
-            className="hover:bg-transparent"
-            variant="outline"
-            onClick={handleReaction}
-          >
-            <FaHeart
-              className={`${
-                isLiked && user ? "text-red-500" : "text-gray-400"
-              }`}
-            />
-            {likeCount}
-          </Button>
-          {displayComments && (
+        <div className="flex justify-between mt-4">
+          <div className="flex gap-1">
             <Button
               className="hover:bg-transparent"
               variant="outline"
-              onClick={() => {
-                if (openComments !== undefined) {
-                  openComments(workout)
-                }
-              }}
+              onClick={handleReaction}
             >
-              <MessageCircle />
-              {workout.comments?.length || 0}
+              <FaHeart
+                className={`${
+                  isLiked && user ? "text-red-500" : "text-gray-400"
+                }`}
+              />
+              {likeCount}
             </Button>
+            {displayComments && (
+              <Button
+                className="hover:bg-transparent"
+                variant="outline"
+                onClick={() => {
+                  if (openComments !== undefined) {
+                    openComments(workout)
+                  }
+                }}
+              >
+                <MessageCircle />
+                {workout.comments?.length || 0}
+              </Button>
+            )}
+          </div>
+          {displayDelete && (
+            <AlertDialog>
+              <AlertDialogTrigger>
+                <Button className="hover:bg-transparent p-3" variant="outline">
+                  <Trash color="#c70000" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Workout</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete this workout?
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={onDelete}>
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           )}
         </div>
       </CardContent>

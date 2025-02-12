@@ -1,5 +1,5 @@
 import { database } from "@/lib/firebase"
-import { get, ref, set, update, onValue, off } from "firebase/database"
+import { get, ref, set, remove, update, onValue, off } from "firebase/database"
 import { v4 as uuidv4 } from "uuid"
 import type { User } from "@/types/user"
 import type { User as FirebaseUser } from "firebase/auth"
@@ -145,6 +145,42 @@ export const updateWorkout = async (
       console.log(`could not update workout : `, err)
       return false
     }
+  }
+}
+
+export const deleteWorkout = async (workoutId: string) => {
+  try {
+    const workoutRef = ref(database, `workouts/${workoutId}`)
+
+    const workoutSnapshot = await get(workoutRef)
+    if (!workoutSnapshot.exists()) {
+      throw new Error("Workout not found.")
+    }
+
+    const workoutData = workoutSnapshot.val()
+    const userId = workoutData.userId
+
+    await remove(workoutRef)
+
+    // If there's an associated user, remove the workoutId from the user's workouts list
+    if (userId) {
+      const userWorkoutsRef = ref(database, `users/${userId}/workouts`)
+      const userWorkoutsSnapshot = await get(userWorkoutsRef)
+
+      if (userWorkoutsSnapshot.exists()) {
+        const userWorkouts: string[] = userWorkoutsSnapshot.val()
+        const updatedWorkouts = userWorkouts.filter((id) => id !== workoutId)
+
+        await update(ref(database, `users/${userId}`), {
+          workouts: updatedWorkouts,
+        })
+      }
+    }
+
+    return true
+  } catch (error) {
+    console.error("Error deleting workout:", error)
+    return false
   }
 }
 
