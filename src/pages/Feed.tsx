@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { listenToWorkouts } from "@/lib/db"
+import { listenToWorkouts, listenToFollowingChanged } from "@/lib/db"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import FeedWorkoutList from "@/components/Feed/FeedWorkoutList"
 import CommentsModal from "@/components/Feed/CommentsModal"
@@ -27,6 +27,23 @@ const Feed = () => {
 
     return () => unsubscribe()
   }, [user])
+
+  useEffect(() => {
+    if (user) {
+      const unsubscribe = listenToFollowingChanged(
+        user?.userId,
+        (following) => {
+          setFollowingWorkouts(
+            allWorkouts?.filter((workout) => {
+              return following.includes(workout.userId)
+            }) || []
+          )
+        }
+      )
+
+      return () => unsubscribe()
+    }
+  }, [user, allWorkouts])
 
   const openComments = (workout: Workout) => {
     if (!commentsModalOpen) {

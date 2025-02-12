@@ -421,6 +421,25 @@ export const followUser = async (
   }
 }
 
+export const listenToFollowingChanged = (
+  userId: string,
+  callback: (following: string[]) => void
+) => {
+  const followingRef = ref(database, `users/${userId}/following`)
+
+  const listener = onValue(followingRef, (snapshot) => {
+    if (snapshot.exists()) {
+      const following = snapshot.val()
+      callback(following)
+    } else {
+      callback([])
+    }
+  })
+
+  // Return unsubscribe function
+  return () => off(followingRef, "value", listener)
+}
+
 export const getFollowersOfUser = async (
   userId: string
 ): Promise<string[] | undefined> => {
