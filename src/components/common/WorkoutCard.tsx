@@ -208,7 +208,9 @@ const WorkoutCard = ({
             {displayProfile && (
               <div
                 className={`flex flex-row ${
-                  user ? "justify-between" : "justify-center"
+                  user && cardUser && user.userId !== cardUser.userId
+                    ? "justify-between"
+                    : "justify-center"
                 } items-center ${
                   workout.title || workout.caption ? "mb-4" : ""
                 }`}
@@ -224,7 +226,7 @@ const WorkoutCard = ({
                     {username || cardUser?.name}
                   </h1>
                 </div>
-                {user && cardUser && (
+                {user && cardUser && user.userId !== cardUser.userId && (
                   <AnimatePresence mode="wait">
                     <motion.div
                       key={isFollowing ? "following" : "follow"}

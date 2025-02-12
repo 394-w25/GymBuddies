@@ -405,6 +405,8 @@ export const followUser = async (
   followerId: string,
   followedId: string
 ): Promise<boolean> => {
+  if (followerId == followedId) return false
+
   try {
     // Helper function to normalize data into an array
     const normalizeToArray = (data: unknown): string[] => {
@@ -463,6 +465,8 @@ export const unfollowUser = async (
   unfollowingId: string,
   unfollowedId: string
 ): Promise<boolean> => {
+  if (unfollowingId == unfollowedId) return false
+
   try {
     // Helper function to normalize data into an array
     const normalizeToArray = (data: unknown): string[] => {
