@@ -36,16 +36,15 @@ const Profile = () => {
     followers: string[]
   }>({ following: [], followers: [] })
 
-  const memoizedUserWorkouts = useMemo(() => userWorkouts, [userWorkouts]);
-  const memoizedUser = useMemo(() => user, [user]);
+  const memoizedUserWorkouts = useMemo(() => userWorkouts, [userWorkouts])
 
   // Memoize graphData to recalculate only when userWorkouts or monthOrYear changes
   const graphData = useMemo(() => {
     return getPoundsPerPeriod(
       memoizedUserWorkouts,
       monthOrYear === "month" ? new Date().getMonth() : new Date().getFullYear()
-    );
-  }, [memoizedUserWorkouts, monthOrYear]);
+    )
+  }, [memoizedUserWorkouts, monthOrYear])
 
   useEffect(() => {
     if (user) {
@@ -91,16 +90,14 @@ const Profile = () => {
         await fetchUserWorkouts()
       }
 
-      fetchTogether();
+      fetchTogether()
 
-      const interval = setInterval(fetchTogether, 30000); // 30 seconds
+      const interval = setInterval(fetchTogether, 30000) // 30 seconds
       return () => {
-        clearInterval(interval); // clear on dismount
+        clearInterval(interval) // clear on dismount
       }
-
-
     }
-  }, [])
+  }, [user, refreshUser])
 
   // useEffect(() => {
   //   setGraphData(
@@ -170,13 +167,7 @@ const Profile = () => {
 
               <CardContent className="w-full h-full flex flex-col ">
                 <WeightliftingChart
-                  data={
-                    monthOrYear === "month"
-                      ? 
-                      graphData[0]
-                      : 
-                      graphData[1]
-                  }
+                  data={monthOrYear === "month" ? graphData[0] : graphData[1]}
                 />
               </CardContent>
             </Card>
