@@ -10,7 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Trash } from "lucide-react"
+import { Trash, X } from "lucide-react"
 import type { Exercise, Set } from "@/types/workout"
 
 interface ExerciseCardProps {
@@ -52,6 +52,19 @@ export function ExerciseCard({
       sets: exercise.sets.map((set, index) =>
         index === setIndex ? { ...set, [field]: value } : set
       ),
+    })
+  }
+
+  const deleteSet = (setIndex: number) => {
+    const filteredSets = exercise.sets.filter((_, index) => index !== setIndex)
+    const updatedSets = filteredSets.map((set, index) => ({
+      ...set,
+      number: index + 1,
+    }))
+
+    onUpdate({
+      ...exercise,
+      sets: updatedSets,
     })
   }
 
@@ -113,6 +126,15 @@ export function ExerciseCard({
                     }
                     className="w-20"
                   />
+                </TableCell>
+                <TableCell className="p-0">
+                  <Button
+                    variant={"destructive"}
+                    className="py-1 px-2"
+                    onClick={() => deleteSet(index)}
+                  >
+                    <X />
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}
