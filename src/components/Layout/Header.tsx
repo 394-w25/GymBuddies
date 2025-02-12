@@ -23,7 +23,7 @@ import { LogOut, Dumbbell, UserCircle2 } from "lucide-react"
 import SearchCard from "../common/SearchCard"
 import { useEffect, useState } from "react"
 import { User } from "@/types/user"
-import { getAllUsers } from "@/lib/db"
+import { listenToUsers } from "@/lib/db"
 
 const Header = () => {
   const { user, handleSignIn, handleSignOut } = useUser()
@@ -31,18 +31,15 @@ const Header = () => {
   const [knownUsers, setKnownUsers] = useState<User[]>([])
 
   useEffect(() => {
-    const fetchKnownUsers = async () => {
-      const users = await getAllUsers()
-      setKnownUsers(users)
-    }
+    const unsubscribe = listenToUsers((users) => {
+      if (user) {
+        delete users[user.userId]
+      }
 
-    fetchKnownUsers()
+      setKnownUsers(Object.values(users))
+    })
 
-    const interval = setInterval(() => {
-      fetchKnownUsers()
-    }, 60000) // once per minute
-
-    return () => clearInterval(interval)
+    return () => unsubscribe()
   }, [user])
 
   return (
@@ -63,7 +60,7 @@ const Header = () => {
         </Button>
       ) : (
         <div className="search-and-user-buttons flex gap-2">
-          <SearchCard currentKnownUsers={Object.values(knownUsers)} />
+          {user && <SearchCard currentKnownUsers={Object.values(knownUsers)} />}
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
