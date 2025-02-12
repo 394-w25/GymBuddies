@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import {
@@ -10,16 +10,25 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { MoreVertical } from "lucide-react"
+import { Trash } from "lucide-react"
 import type { Exercise, Set } from "@/types/workout"
 
 interface ExerciseCardProps {
   exercise: Exercise
   onUpdate: (exercise: Exercise) => void
+  onDelete: () => void
 }
 
-export function ExerciseCard({ exercise, onUpdate }: ExerciseCardProps) {
+export function ExerciseCard({
+  exercise,
+  onUpdate,
+  onDelete,
+}: ExerciseCardProps) {
   const [name, setName] = useState(exercise.name)
+
+  useEffect(() => {
+    setName(exercise.name)
+  }, [exercise])
 
   const addSet = () => {
     const newSet: Set = {
@@ -63,8 +72,13 @@ export function ExerciseCard({ exercise, onUpdate }: ExerciseCardProps) {
           placeholder="Exercise name"
           className="text-lg font-semibold border-none bg-transparent h-auto p-0 focus-visible:ring-0"
         />
-        <Button variant="ghost" size="icon" className="ml-auto">
-          <MoreVertical className="h-4 w-4" />
+        <Button
+          variant="ghost"
+          size="icon"
+          className="ml-auto"
+          onClick={onDelete}
+        >
+          <Trash className="h-4 w-4" color="#c70000" />
         </Button>
       </CardHeader>
       <CardContent>

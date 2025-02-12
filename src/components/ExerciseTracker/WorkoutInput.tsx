@@ -27,12 +27,16 @@ interface WorkoutLogModalProps {
   onSave: (workout: WorkoutLog) => void
 }
 
+interface idExercise extends Exercise {
+  id: number
+}
+
 export function WorkoutLogModal({
   open,
   onOpenChange,
   onSave,
 }: WorkoutLogModalProps) {
-  const [exercises, setExercises] = useState<Exercise[]>([])
+  const [exercises, setExercises] = useState<idExercise[]>([])
 
   // Needs input validation (future dates only, startTime must be before endTime, prevent empty logs)
   const [title, setTitle] = useState<string>("")
@@ -42,7 +46,10 @@ export function WorkoutLogModal({
   const [endTime, setEndTime] = useState<Date>(new Date())
 
   const addExercise = () => {
-    const newExercise: Exercise = {
+    const newId =
+      exercises.length != 0 ? exercises[exercises.length - 1].id + 1 : 0
+
+    const newExercise: idExercise = {
       name: "",
       sets: [
         {
@@ -51,13 +58,16 @@ export function WorkoutLogModal({
           reps: 0,
         },
       ],
+      id: newId,
     }
     setExercises([...exercises, newExercise])
   }
 
-  const updateExercise = (updatedExercise: Exercise, index: number) => {
+  const updateExercise = (updatedExercise: Exercise, id: number) => {
     setExercises(
-      exercises.map((exercise, i) => (i === index ? updatedExercise : exercise))
+      exercises.map((exercise) =>
+        id === exercise.id ? { ...updatedExercise, id: id } : exercise
+      )
     )
   }
 
@@ -72,14 +82,16 @@ export function WorkoutLogModal({
   }
 
   const handleSave = () => {
-    onSave({
+    const workoutInfo: WorkoutLog = {
       date,
       startTime,
       endTime,
       exercises,
       title,
       caption,
-    })
+    }
+
+    onSave(workoutInfo)
     resetModal()
   }
 
@@ -215,7 +227,10 @@ export function WorkoutLogModal({
               key={index}
               exercise={exercise}
               onUpdate={(updatedExercise) =>
-                updateExercise(updatedExercise, index)
+                updateExercise(updatedExercise, exercise.id)
+              }
+              onDelete={() =>
+                setExercises(exercises.filter((e) => e.id !== exercise.id))
               }
             />
           ))}
