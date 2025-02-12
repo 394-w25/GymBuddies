@@ -281,7 +281,7 @@ const Profile = () => {
             </Card>
           </div>
 
-          {user && profileUser.userId !== user.userId && (
+          {(!user || profileUser.userId !== user.userId) && (
             <div className="w-full flex flex-col gap-4 mt-4">
               <h1 className="text-2xl font-bold text-left text-gray-700">
                 Workout History
