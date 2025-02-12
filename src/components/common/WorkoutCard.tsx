@@ -8,7 +8,7 @@ import {
 import { calculateWorkoutVolume, getBestSet } from "@/lib/utils"
 import { useUser } from "@/components/Layout/UserContext"
 import Moment from "react-moment"
-import { ChevronsUpDown } from "lucide-react"
+import { ChevronsUpDown, MessageCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -48,6 +48,7 @@ interface WorkoutCardProps {
   username?: string
   profilePic?: string
   displayProfile?: boolean
+  openComments: (workout: Workout) => void
 }
 
 const WorkoutCard = ({
@@ -56,6 +57,7 @@ const WorkoutCard = ({
   username,
   profilePic,
   displayProfile = true,
+  openComments,
 }: WorkoutCardProps) => {
   const { user } = useUser()
 
@@ -227,18 +229,26 @@ const WorkoutCard = ({
           </Collapsible>
         )}
         {/* Reaction Button Section */}
-        <div className="flex justify-end mt-4">
+        <div className="flex justify-end mt-4 gap-1">
           <Button
             className="hover:bg-transparent"
             variant="outline"
             onClick={handleReaction}
           >
             <FaHeart
-              className={`mr-1 ${
+              className={`${
                 isLiked && user ? "text-red-500" : "text-gray-400"
               }`}
             />
             {likeCount}
+          </Button>
+          <Button
+            className="hover:bg-transparent"
+            variant="outline"
+            onClick={() => openComments(workout)}
+          >
+            <MessageCircle />
+            {workout.comments?.length || 0}
           </Button>
         </div>
       </CardContent>

@@ -349,7 +349,7 @@ export const commentOnWorkout = async (
     const newComments =
       workoutData.comments != undefined
         ? [...workoutData.comments, { uid: commenterId, comment: comment }]
-        : [comment]
+        : [{ uid: commenterId, comment: comment }]
 
     await update(workoutRef, {
       comments: newComments,
