@@ -22,13 +22,21 @@ import {
   listenToFollowingChanged,
   listenToFollowersChanged,
   listenToUserWorkouts,
+  getUser,
 } from "@/lib/db"
 import { Workout } from "@/types/workout"
 import WeightliftingChart from "@/components/Profile/WeightliftingChart"
 import { getPoundsPerPeriod } from "@/lib/count_workouts"
+import { useNavigate, useParams } from "react-router"
+import { User } from "@/types/user"
 
 const Profile = () => {
+  const { uid } = useParams()
   const { user, handleSignIn } = useUser()
+  const navigate = useNavigate()
+
+  const [profileUser, setProfileUser] = useState<User | null>()
+  const [loading, setLoading] = useState<boolean>(true)
   const [userWorkouts, setUserWorkouts] = useState<Workout[]>([])
   const [monthOrYear, setMonthOrYear] = useState("month")
   const [friendsData, setFriendsData] = useState<{
@@ -42,58 +50,89 @@ const Profile = () => {
   )
 
   useEffect(() => {
-    if (!user) return
+    if (uid) {
+      if (user && user.userId == uid) {
+        setProfileUser(user)
+      } else {
+        const getUserInfo = async () => {
+          const profileUserInfo = await getUser(uid)
+          if (profileUserInfo) {
+            setProfileUser(profileUserInfo as User)
+          } else {
+            setLoading(false)
+          }
+        }
+
+        getUserInfo()
+      }
+    } else if (user) {
+      setProfileUser(user)
+    }
+  }, [user, uid])
+
+  useEffect(() => {
+    if (profileUser !== undefined) {
+      setLoading(false)
+    }
+  }, [profileUser])
+
+  useEffect(() => {
+    if (!profileUser) return
 
     const fetchUserWorkouts = async () => {
-      const res = await getAllUserWorkouts(user.userId)
+      const res = await getAllUserWorkouts(profileUser.userId)
       if (res) {
         setUserWorkouts(res)
       }
     }
 
-    const unsubscribe = listenToUserWorkouts(user.userId, () =>
+    const unsubscribe = listenToUserWorkouts(profileUser.userId, () =>
       fetchUserWorkouts()
     )
 
     return () => unsubscribe()
-  }, [user])
+  }, [profileUser])
 
   useEffect(() => {
-    if (user) {
-      const unsubscribe = listenToFollowingChanged(user?.userId, (following) =>
-        setFriendsData((prev) => {
-          return { ...prev, following: following }
-        })
+    if (profileUser) {
+      const unsubscribe = listenToFollowingChanged(
+        profileUser.userId,
+        (following) =>
+          setFriendsData((prev) => {
+            return { ...prev, following: following }
+          })
       )
 
       return () => unsubscribe()
     }
-  }, [user])
+  }, [profileUser])
 
   useEffect(() => {
-    if (user) {
-      const unsubscribe = listenToFollowersChanged(user?.userId, (followers) =>
-        setFriendsData((prev) => {
-          return { ...prev, followers: followers }
-        })
+    if (profileUser) {
+      const unsubscribe = listenToFollowersChanged(
+        profileUser.userId,
+        (followers) =>
+          setFriendsData((prev) => {
+            return { ...prev, followers: followers }
+          })
       )
 
       return () => unsubscribe()
     }
-  }, [user])
+  }, [profileUser])
 
   return (
     <>
-      {user && (
+      {profileUser && (
         <div className="flex flex-col items-center w-full">
           <div className="profile-pic-and-name flex flex-col items-center">
             <Avatar className="w-32 h-32 mb-4">
-              <AvatarImage src={user.profilePic} />
-              <AvatarFallback>{user.name.at(0)}</AvatarFallback>
+              <AvatarImage src={profileUser.profilePic} />
+              <AvatarFallback>{profileUser.name.at(0)}</AvatarFallback>
             </Avatar>
-            <h1 className="text-2xl font-bold">{user.name}</h1>
-            {user.bio && (
-              <p className="text-gray-600 w-[80%] my-4">{user.bio}</p>
+            <h1 className="text-2xl font-bold">{profileUser.name}</h1>
+            {profileUser.bio && (
+              <p className="text-gray-600 w-[80%] my-4">{profileUser.bio}</p>
             )}
 
             {/* FOLLOWERS AND FOLLOWING */}
@@ -149,21 +188,41 @@ const Profile = () => {
         </div>
       )}
 
-      {!user && (
-        <div className="empty-following-message flex flex-col items-center justify-center mt-24">
-          <h1 className="text-center text-4xl font-bold mb-3 text-gray-500">
-            Who's this?
-          </h1>
-          <p className="text-center text-xl text-gray-400">
-            Please sign in to access your profile!
-          </p>
-          <Button className="mt-4" onClick={handleSignIn}>
-            Sign In
-          </Button>
-          <p className="text-center italic text-sm mt-3 text-gray-300">
-            No seriously, who are you...
-          </p>
-        </div>
+      {!profileUser && (
+        <>
+          {uid == undefined ? (
+            <div className="empty-following-message flex flex-col items-center justify-center mt-24">
+              <h1 className="text-center text-4xl font-bold mb-3 text-gray-500">
+                Who's this?
+              </h1>
+              <p className="text-center text-xl text-gray-400">
+                Please sign in to access your profile!
+              </p>
+              <Button className="mt-4" onClick={handleSignIn}>
+                Sign In
+              </Button>
+              <p className="text-center italic text-sm mt-3 text-gray-300">
+                No seriously, who are you...
+              </p>
+            </div>
+          ) : (
+            <>
+              {!loading && (
+                <div className="empty-following-message flex flex-col items-center justify-center mt-24">
+                  <h1 className="text-center text-4xl font-bold mb-3 text-gray-500">
+                    We can't find who you're looking for...
+                  </h1>
+                  <p className="text-center text-xl text-gray-400">
+                    This user does not exist.
+                  </p>
+                  <Button className="mt-4" onClick={() => navigate("/")}>
+                    Go Home
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
+        </>
       )}
     </>
   )

@@ -12,6 +12,7 @@ function App() {
         <Route path="/" element={<Layout />}>
           <Route index element={<Feed />} />
           <Route path="/workouts" element={<ExerciseTracker />} />
+          <Route path="/profile/:uid" element={<Profile />} />
           <Route path="/profile" element={<Profile />} />
           <Route
             path="*"
