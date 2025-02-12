@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import {
   getAllUserWorkouts,
   sortWorkouts,
@@ -36,6 +36,17 @@ const Profile = () => {
     followers: string[]
   }>({ following: [], followers: [] })
 
+  const memoizedUserWorkouts = useMemo(() => userWorkouts, [userWorkouts]);
+  const memoizedUser = useMemo(() => user, [user]);
+
+  // Memoize graphData to recalculate only when userWorkouts or monthOrYear changes
+  const graphData = useMemo(() => {
+    return getPoundsPerPeriod(
+      memoizedUserWorkouts,
+      monthOrYear === "month" ? new Date().getMonth() : new Date().getFullYear()
+    );
+  }, [memoizedUserWorkouts, monthOrYear]);
+
   useEffect(() => {
     if (user) {
       refreshUser() // make sure everything up to date
@@ -45,7 +56,7 @@ const Profile = () => {
           const res = await getAllUserWorkouts(user.userId)
           if (res) {
             res.reverse()
-            console.log(res)
+            // console.log(res)
             const sorted = sortWorkouts(res)
             setUserWorkouts(sorted)
           }
@@ -59,9 +70,9 @@ const Profile = () => {
             getFollowingOfUser(user.userId),
           ])
 
-          console.log(
-            `FOLLOWERS : ${followersList} -- FOLLOWING : ${followingList}`
-          )
+          // console.log(
+          //   `FOLLOWERS : ${followersList} -- FOLLOWING : ${followingList}`
+          // )
 
           if (followersList !== undefined && followingList !== undefined) {
             setFriendsData((prev) => {
@@ -75,10 +86,30 @@ const Profile = () => {
         }
       }
 
-      fetchUserFollowersFollowing()
-      fetchUserWorkouts()
+      const fetchTogether = async () => {
+        await fetchUserFollowersFollowing()
+        await fetchUserWorkouts()
+      }
+
+      fetchTogether();
+
+      const interval = setInterval(fetchTogether, 30000); // 30 seconds
+      return () => {
+        clearInterval(interval); // clear on dismount
+      }
+
+
     }
-  }, [user, refreshUser])
+  }, [])
+
+  // useEffect(() => {
+  //   setGraphData(
+  //     getPoundsPerPeriod(
+  //       userWorkouts,
+  //       new Date().getMonth()
+  //     )
+  //   )
+  // }, [userWorkouts, monthOrYear]);
 
   return (
     <>
@@ -141,14 +172,10 @@ const Profile = () => {
                 <WeightliftingChart
                   data={
                     monthOrYear === "month"
-                      ? getPoundsPerPeriod(
-                          userWorkouts,
-                          new Date().getMonth()
-                        )[0]
-                      : getPoundsPerPeriod(
-                          userWorkouts,
-                          new Date().getMonth()
-                        )[1]
+                      ? 
+                      graphData[0]
+                      : 
+                      graphData[1]
                   }
                 />
               </CardContent>

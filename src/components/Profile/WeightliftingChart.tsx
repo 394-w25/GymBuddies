@@ -1,8 +1,9 @@
 import { Chart } from "chart.js/auto";
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 import { WeightData } from "@/lib/count_workouts";
 
-const WeightliftingChart = ({data} : {data : WeightData[]}) => {
+
+const useWeightliftingChart = ({data} : {data : WeightData[]}) => {
 
     console.log(`\n\nDATA : ${JSON.stringify(data)}\n\n`);
 
@@ -60,5 +61,9 @@ const WeightliftingChart = ({data} : {data : WeightData[]}) => {
   
     return (<canvas className="w-full min-h-[150px] mt-2" ref={canvasRef}></canvas>)
 }
+
+const WeightliftingChart = memo(useWeightliftingChart, (prevData, newData) => {
+  return (JSON.stringify(prevData) === JSON.stringify(newData));
+})
 
 export default WeightliftingChart;
