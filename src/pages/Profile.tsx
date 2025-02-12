@@ -16,19 +16,19 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import {
   getAllUserWorkouts,
-  sortWorkouts,
-  getFollowersOfUser,
-  getFollowingOfUser,
+  listenToFollowingChanged,
+  listenToFollowersChanged,
+  listenToUserWorkouts,
 } from "@/lib/db"
 import { Workout } from "@/types/workout"
 import WeightliftingChart from "@/components/Profile/WeightliftingChart"
 import { getPoundsPerPeriod } from "@/lib/count_workouts"
 
 const Profile = () => {
-  const { user, refreshUser, handleSignIn } = useUser()
+  const { user, handleSignIn } = useUser()
   const [userWorkouts, setUserWorkouts] = useState<Workout[]>([])
   const [monthOrYear, setMonthOrYear] = useState("month")
   const [friendsData, setFriendsData] = useState<{
@@ -36,77 +36,51 @@ const Profile = () => {
     followers: string[]
   }>({ following: [], followers: [] })
 
-  const memoizedUserWorkouts = useMemo(() => userWorkouts, [userWorkouts])
+  const graphData = getPoundsPerPeriod(
+    userWorkouts,
+    monthOrYear === "month" ? new Date().getMonth() : new Date().getFullYear()
+  )
 
-  // Memoize graphData to recalculate only when userWorkouts or monthOrYear changes
-  const graphData = useMemo(() => {
-    return getPoundsPerPeriod(
-      memoizedUserWorkouts,
-      monthOrYear === "month" ? new Date().getMonth() : new Date().getFullYear()
+  useEffect(() => {
+    if (!user) return
+
+    const fetchUserWorkouts = async () => {
+      const res = await getAllUserWorkouts(user.userId)
+      if (res) {
+        setUserWorkouts(res)
+      }
+    }
+
+    const unsubscribe = listenToUserWorkouts(user.userId, () =>
+      fetchUserWorkouts()
     )
-  }, [memoizedUserWorkouts, monthOrYear])
+
+    return () => unsubscribe()
+  }, [user])
 
   useEffect(() => {
     if (user) {
-      refreshUser() // make sure everything up to date
+      const unsubscribe = listenToFollowingChanged(user?.userId, (following) =>
+        setFriendsData((prev) => {
+          return { ...prev, following: following }
+        })
+      )
 
-      const fetchUserWorkouts = async () => {
-        if (user) {
-          const res = await getAllUserWorkouts(user.userId)
-          if (res) {
-            res.reverse()
-            // console.log(res)
-            const sorted = sortWorkouts(res)
-            setUserWorkouts(sorted)
-          }
-        }
-      }
-
-      const fetchUserFollowersFollowing = async () => {
-        if (user) {
-          const [followersList, followingList] = await Promise.all([
-            getFollowersOfUser(user.userId),
-            getFollowingOfUser(user.userId),
-          ])
-
-          // console.log(
-          //   `FOLLOWERS : ${followersList} -- FOLLOWING : ${followingList}`
-          // )
-
-          if (followersList !== undefined && followingList !== undefined) {
-            setFriendsData((prev) => {
-              return {
-                ...prev,
-                following: followingList as string[],
-                followers: followersList as string[],
-              }
-            })
-          }
-        }
-      }
-
-      const fetchTogether = async () => {
-        await fetchUserFollowersFollowing()
-        await fetchUserWorkouts()
-      }
-
-      fetchTogether()
-
-      const interval = setInterval(fetchTogether, 30000) // 30 seconds
-      return () => {
-        clearInterval(interval) // clear on dismount
-      }
+      return () => unsubscribe()
     }
-  }, [user, refreshUser])
+  }, [user])
 
-  // useEffect(() => {
-  //   setGraphData(
-  //     getPoundsPerPeriod(
-  //       userWorkouts,
-  //       new Date().getMonth()
-  //     )
-  //   )
-  // }, [userWorkouts, monthOrYear]);
+  useEffect(() => {
+    if (user) {
+      const unsubscribe = listenToFollowersChanged(user?.userId, (followers) =>
+        setFriendsData((prev) => {
+          return { ...prev, followers: followers }
+        })
+      )
+
+      return () => unsubscribe()
+    }
+  }, [user])
 
   return (
     <>
@@ -141,12 +115,12 @@ const Profile = () => {
 
           <div className="stats-portion w-full flex flex-col">
             <Card className="w-full mt-5 flex flex-col text-left">
-              <CardHeader>
+              <CardHeader className="pb-2">
                 <div className="flex flex-col md:flex-row w-full justify-between">
                   <div>
                     <CardTitle>Strength Tracker</CardTitle>
-                    <CardDescription>
-                      Track your progress, watch your growth.
+                    <CardDescription className="mt-1">
+                      Track your progress, watch your growth
                     </CardDescription>
                   </div>
 

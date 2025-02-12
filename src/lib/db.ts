@@ -77,7 +77,7 @@ export const getAllUsers = async (): Promise<User[]> => {
   }
 }
 
-export const listenToUsers = (
+export const listenToAllUsers = (
   callback: (users: { [key: string]: User }) => void
 ) => {
   const usersRef = ref(database, "users")
@@ -126,43 +126,6 @@ export const addWorkout = async (userId: string, workout: WorkoutLog) => {
   } catch (error) {
     console.log("Error adding workout:", error)
     return false
-  }
-}
-
-// NOTE: This function does not work (but we're not currently using it)
-export const updateWorkout = async (
-  userId: string,
-  workoutId: string,
-  workout: WorkoutLog
-) => {
-  if (workout.endTime) {
-    const workoutData = {
-      workoutId,
-      userId: userId,
-      title: workout.title,
-      caption: workout.caption,
-      date: workout.date,
-      startTime: workout.startTime,
-      endTime: workout.endTime,
-      exercises: workout.exercises,
-    }
-
-    try {
-      await set(ref(database, `workouts/${workoutId}`), workoutData)
-      return true
-    } catch (err) {
-      console.log(`could not update finalized workout : `, err)
-      return false
-    }
-  } else {
-    try {
-      await update(ref(database, `workouts/${workoutId}`), workout)
-
-      return true
-    } catch (err) {
-      console.log(`could not update workout : `, err)
-      return false
-    }
   }
 }
 
@@ -242,7 +205,9 @@ const transformWorkouts = (workoutsData: unknown): Workout[] => {
   })
 }
 
-export const listenToWorkouts = (callback: (workouts: Workout[]) => void) => {
+export const listenToAllWorkouts = (
+  callback: (workouts: Workout[]) => void
+) => {
   const workoutsRef = ref(database, "workouts")
 
   const listener = onValue(workoutsRef, (snapshot) => {
@@ -256,6 +221,25 @@ export const listenToWorkouts = (callback: (workouts: Workout[]) => void) => {
 
   // Return unsubscribe function
   return () => off(workoutsRef, "value", listener)
+}
+
+export const listenToUserWorkouts = (
+  userId: string,
+  callback: (workouts: Workout[]) => void
+) => {
+  const userWorkoutIdsRef = ref(database, `users/${userId}/workouts`)
+
+  const listener = onValue(userWorkoutIdsRef, (snapshot) => {
+    if (snapshot.exists()) {
+      const workoutIds = snapshot.val()
+      callback(workoutIds)
+    } else {
+      callback([])
+    }
+  })
+
+  // Return unsubscribe function
+  return () => off(userWorkoutIdsRef, "value", listener)
 }
 
 export const getAllWorkouts = async (): Promise<Workout[]> => {
@@ -550,6 +534,25 @@ export const listenToFollowingChanged = (
 
   // Return unsubscribe function
   return () => off(followingRef, "value", listener)
+}
+
+export const listenToFollowersChanged = (
+  userId: string,
+  callback: (following: string[]) => void
+) => {
+  const followersRef = ref(database, `users/${userId}/followers`)
+
+  const listener = onValue(followersRef, (snapshot) => {
+    if (snapshot.exists()) {
+      const followers = snapshot.val()
+      callback(followers)
+    } else {
+      callback([])
+    }
+  })
+
+  // Return unsubscribe function
+  return () => off(followersRef, "value", listener)
 }
 
 export const getFollowersOfUser = async (

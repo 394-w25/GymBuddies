@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { listenToWorkouts, listenToFollowingChanged } from "@/lib/db"
+import { listenToAllWorkouts, listenToFollowingChanged } from "@/lib/db"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import FeedWorkoutList from "@/components/Feed/FeedWorkoutList"
 import CommentsModal from "@/components/Feed/CommentsModal"
@@ -16,7 +16,7 @@ const Feed = () => {
   const { user } = useUser()
 
   useEffect(() => {
-    const unsubscribe = listenToWorkouts((workouts) => {
+    const unsubscribe = listenToAllWorkouts((workouts) => {
       setAllWorkouts(workouts)
       setFollowingWorkouts(
         workouts.filter((workout) => {

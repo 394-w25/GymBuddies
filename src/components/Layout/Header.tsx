@@ -23,7 +23,7 @@ import { LogOut, Dumbbell, UserCircle2 } from "lucide-react"
 import SearchCard from "../common/SearchCard"
 import { useEffect, useState } from "react"
 import { User } from "@/types/user"
-import { listenToUsers } from "@/lib/db"
+import { listenToAllUsers } from "@/lib/db"
 
 const Header = () => {
   const { user, handleSignIn, handleSignOut } = useUser()
@@ -31,7 +31,7 @@ const Header = () => {
   const [knownUsers, setKnownUsers] = useState<User[]>([])
 
   useEffect(() => {
-    const unsubscribe = listenToUsers((users) => {
+    const unsubscribe = listenToAllUsers((users) => {
       if (user) {
         delete users[user.userId]
       }
