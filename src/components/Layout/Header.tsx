@@ -62,7 +62,7 @@ const Header = () => {
           Login
         </Button>
       ) : (
-        <div className="search-and-user-buttons flex gap-4">
+        <div className="search-and-user-buttons flex gap-2">
           <SearchCard currentKnownUsers={Object.values(knownUsers)} />
 
           <DropdownMenu>
