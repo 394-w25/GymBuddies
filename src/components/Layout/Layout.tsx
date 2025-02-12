@@ -15,7 +15,7 @@ const Layout = () => {
     <div className="flex flex-col min-h-screen">
       <UserContextProvider>
         <Header />
-        <main className="flex-grow p-6 bg-gray-100">
+        <main className="flex-grow p-6 pt-4 bg-gray-100">
           <Outlet />
         </main>
         <Footer items={footerItems} />

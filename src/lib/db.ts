@@ -457,6 +457,64 @@ export const followUser = async (
   }
 }
 
+export const unfollowUser = async (
+  unfollowingId: string,
+  unfollowedId: string
+): Promise<boolean> => {
+  try {
+    // Helper function to normalize data into an array
+    const normalizeToArray = (data: unknown): string[] => {
+      if (data === undefined || data === null) {
+        return []
+      }
+      if (typeof data === "object" && !Array.isArray(data)) {
+        // If data is an object (Firebase-style "array"), convert it to an array
+        return Object.values(data)
+      }
+      // If data is already an array, return it as-is
+      return Array.isArray(data) ? data : [data]
+    }
+
+    // Retrieve the unfollowing user's data
+    const unfollowingUserSnapshot = await get(
+      ref(database, `users/${unfollowingId}`)
+    )
+    if (!unfollowingUserSnapshot.exists()) {
+      throw new Error("Failed to get data about user trying to unfollow.")
+    }
+    const unfollowingUser = unfollowingUserSnapshot.val()
+    const currentFollowing = normalizeToArray(unfollowingUser.following)
+    const updatedFollowing = currentFollowing.filter(
+      (id) => id !== unfollowedId
+    )
+
+    // Retrieve the unfollowed user's data
+    const unfollowedUserSnapshot = await get(
+      ref(database, `users/${unfollowedId}`)
+    )
+    if (!unfollowedUserSnapshot.exists()) {
+      throw new Error("Failed to get data about user being unfollowed.")
+    }
+    const unfollowedUser = unfollowedUserSnapshot.val()
+    const currentFollowers = normalizeToArray(unfollowedUser.followers)
+    const updatedFollowers = currentFollowers.filter(
+      (id) => id !== unfollowingId
+    )
+
+    // Batch update to apply changes to both users
+    const updates: { [key: string]: unknown } = {}
+    updates[`users/${unfollowingId}/following`] = updatedFollowing
+    updates[`users/${unfollowedId}/followers`] = updatedFollowers
+
+    await update(ref(database), updates)
+
+    return true
+  } catch (err) {
+    console.log("Error occurred during unfollow:", err)
+    return false
+  }
+}
+
 export const listenToFollowingChanged = (
   userId: string,
   callback: (following: string[]) => void
