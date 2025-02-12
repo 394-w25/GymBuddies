@@ -1,18 +1,24 @@
-import { Workout } from '@/types/workout'
-import WorkoutCard from '../common/WorkoutCard';
+import { Workout } from "@/types/workout"
+import WorkoutCard from "../common/WorkoutCard"
 
-type Props = {
-    workoutList : Workout[] | null;
+type FeedWorkoutListProps = {
+  workoutList: Workout[] | null
+  openComments: (workout: Workout) => void
 }
 
-function FeedWorkoutList(props: Props) {
-    const workoutList = props.workoutList;
+function FeedWorkoutList(props: FeedWorkoutListProps) {
+  const workoutList = props.workoutList
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-4">
         {workoutList?.map((workout, key) => (
-          <WorkoutCard key={key} userId={workout.userId} workout={workout} />
+          <WorkoutCard
+            key={key}
+            userId={workout.userId}
+            workout={workout}
+            openComments={props.openComments}
+          />
         ))}
       </div>
     </div>

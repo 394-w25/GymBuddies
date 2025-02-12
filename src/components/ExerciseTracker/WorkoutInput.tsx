@@ -87,7 +87,7 @@ export function WorkoutLogModal({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="bottom"
-        className="h-[90vh] overflow-y-auto"
+        className="h-[90vh] overflow-y-auto rounded-t-2xl"
         showDefaultCloseButton={false}
       >
         <SheetHeader className="flex-row items-center justify-between space-y-0 pb-4">

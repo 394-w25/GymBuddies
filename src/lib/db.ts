@@ -90,7 +90,6 @@ export const addWorkout = async (userId: string, workout: WorkoutLog) => {
     startTime: workout.startTime.getTime(),
     endTime: workout.endTime.getTime(),
     exercises: workout.exercises,
-    likes: [],
   }
 
   try {
@@ -331,6 +330,36 @@ export const listenToWorkoutLikes = (
 
   // Return unsubscribe function
   return () => off(likesRef, "value", listener)
+}
+
+export const commentOnWorkout = async (
+  workoutId: string,
+  commenterId: string,
+  comment: string
+) => {
+  try {
+    const workoutRef = ref(database, `workouts/${workoutId}`)
+
+    const snapshot = await get(workoutRef)
+    if (!snapshot.exists()) {
+      throw new Error("Workout does not exist!")
+    }
+
+    const workoutData = snapshot.val() as Workout
+    const newComments =
+      workoutData.comments != undefined
+        ? [...workoutData.comments, { uid: commenterId, comment: comment }]
+        : [{ uid: commenterId, comment: comment }]
+
+    await update(workoutRef, {
+      comments: newComments,
+    })
+
+    return true
+  } catch (err) {
+    console.log("Error commenting on workout:", err)
+    return false
+  }
 }
 
 // Follow Functions

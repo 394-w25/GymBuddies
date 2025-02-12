@@ -9,6 +9,11 @@ export interface Exercise {
   sets: Set[]
 }
 
+export interface Comment {
+  uid: string
+  comment: string
+}
+
 // Todo: Get rid of date
 export interface WorkoutLog {
   title: string
@@ -23,4 +28,5 @@ export interface Workout extends WorkoutLog {
   workoutId: string
   userId: string
   likes: string[]
+  comments: Comment[]
 }
