@@ -81,8 +81,8 @@ const Feed = () => {
                     No workouts to display...
                   </h1>
                   <p className="text-center text-xl text-gray-400">
-                    Make sure you're logged in, following some friends, and that
-                    they're active on the app!
+                    Make sure you're following some friends that are active on
+                    the app!
                   </p>
                 </div>
               )}

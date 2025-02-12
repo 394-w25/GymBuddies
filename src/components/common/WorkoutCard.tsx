@@ -4,11 +4,14 @@ import {
   likeWorkout,
   unlikeWorkout,
   listenToWorkoutLikes,
+  followUser,
+  unfollowUser,
+  listenToFollowingChanged,
 } from "@/lib/db"
 import { calculateWorkoutVolume, getBestSet } from "@/lib/utils"
 import { useUser } from "@/components/Layout/UserContext"
 import Moment from "react-moment"
-import { ChevronsUpDown, MessageCircle, Trash } from "lucide-react"
+import { ChevronsUpDown, MessageCircle, Trash, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -82,6 +85,7 @@ const WorkoutCard = ({
   const [cardUser, setCardUser] = useState<User | null>()
   const [likeCount, setLikeCount] = useState<number>(workout.likes?.length || 0)
   const [isLiked, setIsLiked] = useState<boolean>(true)
+  const [isFollowing, setIsFollowing] = useState<boolean>(false)
 
   useEffect(() => {
     const getUserInfo = async () => {
@@ -99,6 +103,16 @@ const WorkoutCard = ({
       setIsLiked(workout.likes?.includes(user.userId))
     }
   }, [user, workout.likes])
+
+  useEffect(() => {
+    if (user && cardUser) {
+      const unsubscribe = listenToFollowingChanged(user.userId, (following) =>
+        setIsFollowing(following.includes(cardUser?.userId))
+      )
+
+      return () => unsubscribe()
+    }
+  }, [user, cardUser])
 
   useEffect(() => {
     const unsubscribe = listenToWorkoutLikes(workout.workoutId, (likes) => {
@@ -133,6 +147,24 @@ const WorkoutCard = ({
         setLikeCount((prev) => prev - 1)
         setIsLiked(false)
       }
+    }
+  }
+
+  const handleFollowUser = async () => {
+    if (!user || !cardUser) return
+
+    const success = await followUser(user.userId, cardUser?.userId)
+    if (success) {
+      setIsFollowing(true)
+    }
+  }
+
+  const handleUnfollowUser = async () => {
+    if (!user || !cardUser) return
+
+    const success = await unfollowUser(user.userId, cardUser?.userId)
+    if (success) {
+      setIsFollowing(false)
     }
   }
 
@@ -172,9 +204,9 @@ const WorkoutCard = ({
       <CardHeader className="pb-6">
         {displayProfile && (
           <div
-            className={`flex flex-col justify-center items-center ${
-              workout.title || workout.caption ? "mb-4" : ""
-            }`}
+            className={`flex flex-row ${
+              user ? "justify-between" : "justify-center"
+            } items-center ${workout.title || workout.caption ? "mb-4" : ""}`}
           >
             <div className="flex justify-center items-center gap-2">
               <Avatar>
@@ -187,6 +219,20 @@ const WorkoutCard = ({
                 {username || cardUser?.name}
               </h1>
             </div>
+            {user && cardUser && (
+              <div>
+                {isFollowing ? (
+                  <Button onClick={handleUnfollowUser}>
+                    <Check />
+                    Following
+                  </Button>
+                ) : (
+                  <Button variant="outline" onClick={handleFollowUser}>
+                    Follow
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
         )}
         {workout.title && <CardTitle>{workout.title}</CardTitle>}
