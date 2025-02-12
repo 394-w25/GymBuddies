@@ -48,7 +48,8 @@ interface WorkoutCardProps {
   username?: string
   profilePic?: string
   displayProfile?: boolean
-  openComments: (workout: Workout) => void
+  displayComments?: boolean
+  openComments?: (workout: Workout) => void
 }
 
 const WorkoutCard = ({
@@ -56,6 +57,7 @@ const WorkoutCard = ({
   workout,
   username,
   profilePic,
+  displayComments = true,
   displayProfile = true,
   openComments,
 }: WorkoutCardProps) => {
@@ -242,14 +244,20 @@ const WorkoutCard = ({
             />
             {likeCount}
           </Button>
-          <Button
-            className="hover:bg-transparent"
-            variant="outline"
-            onClick={() => openComments(workout)}
-          >
-            <MessageCircle />
-            {workout.comments?.length || 0}
-          </Button>
+          {displayComments && (
+            <Button
+              className="hover:bg-transparent"
+              variant="outline"
+              onClick={() => {
+                if (openComments !== undefined) {
+                  openComments(workout)
+                }
+              }}
+            >
+              <MessageCircle />
+              {workout.comments?.length || 0}
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>

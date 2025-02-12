@@ -72,6 +72,7 @@ const ExerciseTracker = () => {
                   username={user.name}
                   profilePic={user.profilePic}
                   displayProfile={false}
+                  displayComments={false}
                 />
               ))}
             </div>
