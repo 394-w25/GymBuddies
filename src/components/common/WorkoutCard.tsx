@@ -202,91 +202,101 @@ const WorkoutCard = ({
 
   return (
     <Card className="">
-      <CardHeader className="pb-6">
-        {displayProfile && (
-          <div
-            className={`flex flex-row ${
-              user ? "justify-between" : "justify-center"
-            } items-center ${workout.title || workout.caption ? "mb-4" : ""}`}
-          >
-            <div className="flex justify-center items-center gap-2">
-              <Avatar>
-                <AvatarImage src={profilePic || cardUser?.profilePic} />
-                <AvatarFallback>
-                  {username?.at(0) || cardUser?.name.at(0)}
-                </AvatarFallback>
-              </Avatar>
-              <h1 className="font-bold text-xl">
-                {username || cardUser?.name}
-              </h1>
-            </div>
-            {user && cardUser && (
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={isFollowing ? "following" : "follow"}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  {isFollowing ? (
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground"
-                        >
+      {(displayProfile || workout.title || workout.caption) && (
+        <>
+          <CardHeader className="pb-6">
+            {displayProfile && (
+              <div
+                className={`flex flex-row ${
+                  user ? "justify-between" : "justify-center"
+                } items-center ${
+                  workout.title || workout.caption ? "mb-4" : ""
+                }`}
+              >
+                <div className="flex justify-center items-center gap-2">
+                  <Avatar>
+                    <AvatarImage src={profilePic || cardUser?.profilePic} />
+                    <AvatarFallback>
+                      {username?.at(0) || cardUser?.name.at(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <h1 className="font-bold text-xl">
+                    {username || cardUser?.name}
+                  </h1>
+                </div>
+                {user && cardUser && (
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={isFollowing ? "following" : "follow"}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      {isFollowing ? (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground"
+                            >
+                              <motion.div
+                                className="flex items-center"
+                                initial={{ width: "auto" }}
+                                animate={{ width: "auto" }}
+                              >
+                                <Check className="mr-2 h-4 w-4" />
+                                Following
+                              </motion.div>
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>
+                                Unfollow {cardUser.name}?
+                              </AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to unfollow?
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={handleUnfollowUser}>
+                                Unfollow
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      ) : (
+                        <Button variant="outline" onClick={handleFollowUser}>
                           <motion.div
                             className="flex items-center"
                             initial={{ width: "auto" }}
                             animate={{ width: "auto" }}
                           >
-                            <Check className="mr-2 h-4 w-4" />
-                            Following
+                            Follow
                           </motion.div>
                         </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>
-                            Unfollow {cardUser.name}?
-                          </AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Are you sure you want to unfollow?
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction onClick={handleUnfollowUser}>
-                            Unfollow
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  ) : (
-                    <Button variant="outline" onClick={handleFollowUser}>
-                      <motion.div
-                        className="flex items-center"
-                        initial={{ width: "auto" }}
-                        animate={{ width: "auto" }}
-                      >
-                        Follow
-                      </motion.div>
-                    </Button>
-                  )}
-                </motion.div>
-              </AnimatePresence>
+                      )}
+                    </motion.div>
+                  </AnimatePresence>
+                )}
+              </div>
             )}
-          </div>
-        )}
-        {workout.title && <CardTitle>{workout.title}</CardTitle>}
-        {workout.caption && (
-          <CardDescription>{workout.caption}</CardDescription>
-        )}
-      </CardHeader>
-      <Separator className="mb-6" />
+            {workout.title && <CardTitle>{workout.title}</CardTitle>}
+            {workout.caption && (
+              <CardDescription>{workout.caption}</CardDescription>
+            )}
+          </CardHeader>
+          <Separator className="mb-6" />
+        </>
+      )}
       <CardContent>
-        <div className="flex justify-between items-center gap-6 px-2 mb-6">
+        <div
+          className={`flex justify-between items-center gap-6 px-2 mb-6 ${
+            !(displayProfile || workout.title || workout.caption) && "mt-6"
+          }`}
+        >
           <div className="flex flex-col max-w-[32%] overflow-hidden">
             <h2 className="font-bold">Date</h2>
             <Moment format="M/D/YY">{workout.date}</Moment>

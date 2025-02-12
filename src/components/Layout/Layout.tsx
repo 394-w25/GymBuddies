@@ -3,6 +3,7 @@ import Footer from "./Footer"
 import { Outlet } from "react-router"
 import UserContextProvider from "./UserContext"
 import { Home, Dumbbell, User } from "lucide-react"
+import { Toaster } from "@/components/ui/toaster"
 
 const Layout = () => {
   const footerItems = [
@@ -20,6 +21,7 @@ const Layout = () => {
         </main>
         <Footer items={footerItems} />
       </UserContextProvider>
+      <Toaster />
     </div>
   )
 }

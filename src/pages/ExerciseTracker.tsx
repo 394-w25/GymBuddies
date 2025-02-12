@@ -10,9 +10,13 @@ import { Button } from "@/components/ui/button"
 import { WorkoutLogModal } from "@/components/ExerciseTracker/WorkoutInput"
 import WorkoutCard from "@/components/common/WorkoutCard"
 import type { Workout, WorkoutLog } from "@/types/workout"
+import { calculateWorkoutVolume } from "@/lib/utils"
+import { useToast } from "@/hooks/use-toast"
 
 const ExerciseTracker = () => {
   const { user, handleSignIn } = useUser()
+  const { toast } = useToast()
+
   const [userWorkouts, setUserWorkouts] = useState<Workout[] | null>([])
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
 
@@ -29,9 +33,37 @@ const ExerciseTracker = () => {
     fetchUserWorkouts()
   }, [user])
 
-  const handleSaveWorkout = async (workout: WorkoutLog) => {
-    // Todo: Display error to user
-    if (!user || workout.exercises.length == 0) return
+  const handleSaveWorkout = async (workout: WorkoutLog): Promise<boolean> => {
+    if (!user) return false
+
+    let error = [false, ""]
+
+    const workoutDuration =
+      workout.endTime.getTime() - workout.startTime.getTime()
+    if (!(workoutDuration > 0))
+      error = [
+        true,
+        "Your workout has to be at least 1 minute long. Please check your start and end times!",
+      ]
+
+    const workoutVolume = calculateWorkoutVolume(workout.exercises)
+    if (!(workoutVolume > 0))
+      error = [true, "Please add weight and reps to your exercises!"]
+
+    if (workout.exercises.length == 0)
+      error = [
+        true,
+        "You need at least one exercise (with a name) in this workout!",
+      ]
+
+    if (error[0]) {
+      toast({
+        variant: "destructive",
+        title: "Something's not right...",
+        description: error[1] || "There's a problem with your workout.",
+      })
+      return false
+    }
 
     const res = await addWorkout(user.userId, workout)
     if (res !== false && userWorkouts !== null) {
@@ -47,6 +79,8 @@ const ExerciseTracker = () => {
       ]
       setUserWorkouts(sortWorkouts(newWorkouts))
     }
+
+    return true
   }
 
   const handleDelete = async (workoutId: string) => {

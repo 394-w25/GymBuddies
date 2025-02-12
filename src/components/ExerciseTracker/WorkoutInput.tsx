@@ -24,7 +24,7 @@ import type { Exercise, WorkoutLog } from "@/types/workout"
 interface WorkoutLogModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSave: (workout: WorkoutLog) => void
+  onSave: (workout: WorkoutLog) => Promise<boolean>
 }
 
 interface idExercise extends Exercise {
@@ -82,17 +82,24 @@ export function WorkoutLogModal({
   }
 
   const handleSave = () => {
+    const filteredExercises = exercises.filter(
+      (exercise) => exercise.name !== "" && exercise.sets.length > 0
+    )
+
     const workoutInfo: WorkoutLog = {
       date,
       startTime,
       endTime,
-      exercises,
+      exercises: filteredExercises,
       title,
       caption,
     }
 
-    onSave(workoutInfo)
-    resetModal()
+    onSave(workoutInfo).then((res) => {
+      if (res) {
+        resetModal()
+      }
+    })
   }
 
   return (
