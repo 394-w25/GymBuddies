@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react"
-import { addWorkout, getAllUserWorkouts, sortWorkouts } from "@/lib/db"
+import {
+  addWorkout,
+  getAllUserWorkouts,
+  sortWorkouts,
+  deleteWorkout,
+} from "@/lib/db"
 import { useUser } from "@/components/Layout/UserContext"
 import { Button } from "@/components/ui/button"
 import { WorkoutLogModal } from "@/components/ExerciseTracker/WorkoutInput"
@@ -44,6 +49,15 @@ const ExerciseTracker = () => {
     }
   }
 
+  const handleDelete = async (workoutId: string) => {
+    const success = await deleteWorkout(workoutId)
+    if (success && userWorkouts !== null) {
+      setUserWorkouts(
+        userWorkouts.filter((workout) => workout.workoutId !== workoutId)
+      )
+    }
+  }
+
   return (
     <>
       {user && (
@@ -73,6 +87,8 @@ const ExerciseTracker = () => {
                   profilePic={user.profilePic}
                   displayProfile={false}
                   displayComments={false}
+                  displayDelete={true}
+                  onDelete={() => handleDelete(workout.workoutId)}
                 />
               ))}
             </div>
