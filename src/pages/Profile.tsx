@@ -45,6 +45,7 @@ const Profile = () => {
   const { user, handleSignIn } = useUser()
   const navigate = useNavigate()
 
+  const [currUid, setCurrUid] = useState<string | undefined>(uid)
   const [profileUser, setProfileUser] = useState<User | null>()
   const [loading, setLoading] = useState<boolean>(true)
   const [userWorkouts, setUserWorkouts] = useState<Workout[]>([])
@@ -61,12 +62,16 @@ const Profile = () => {
   )
 
   useEffect(() => {
-    if (uid) {
-      if (user && user.userId == uid) {
+    setCurrUid(uid)
+  }, [uid])
+
+  useEffect(() => {
+    if (currUid) {
+      if (user && user.userId == currUid) {
         setProfileUser(user)
       } else {
         const getUserInfo = async () => {
-          const profileUserInfo = await getUser(uid)
+          const profileUserInfo = await getUser(currUid)
           if (profileUserInfo) {
             setProfileUser(profileUserInfo as User)
           } else {
@@ -78,8 +83,10 @@ const Profile = () => {
       }
     } else if (user) {
       setProfileUser(user)
+    } else {
+      setProfileUser(null)
     }
-  }, [user, uid])
+  }, [user, currUid])
 
   useEffect(() => {
     if (profileUser !== undefined) {
@@ -304,7 +311,7 @@ const Profile = () => {
 
       {!profileUser && (
         <>
-          {uid == undefined ? (
+          {currUid == undefined ? (
             <div className="empty-following-message flex flex-col items-center justify-center mt-24">
               <h1 className="text-center text-4xl font-bold mb-3 text-gray-500">
                 Who's this?
