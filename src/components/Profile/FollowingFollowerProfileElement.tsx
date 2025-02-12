@@ -35,7 +35,7 @@ export default function FollowingFollowerProfileElement({friends}: Props) {
 
         <Dialog>
             <DialogTrigger asChild>
-                <p className="">
+                <p className="cursor-pointer">
                     <span className="font-bold">
                         {friends.following.length}
                     </span>{" "}
