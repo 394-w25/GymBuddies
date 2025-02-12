@@ -222,10 +222,30 @@ const WorkoutCard = ({
             {user && cardUser && (
               <div>
                 {isFollowing ? (
-                  <Button onClick={handleUnfollowUser}>
-                    <Check />
-                    Following
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button>
+                        <Check />
+                        Following
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          Unfollow {cardUser.name}?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want unfollow?
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleUnfollowUser}>
+                          Unfollow
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 ) : (
                   <Button variant="outline" onClick={handleFollowUser}>
                     Follow
@@ -323,7 +343,7 @@ const WorkoutCard = ({
           </div>
           {displayDelete && (
             <AlertDialog>
-              <AlertDialogTrigger>
+              <AlertDialogTrigger asChild>
                 <Button className="hover:bg-transparent p-3" variant="outline">
                   <Trash color="#c70000" />
                 </Button>
