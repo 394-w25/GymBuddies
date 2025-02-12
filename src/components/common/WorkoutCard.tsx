@@ -39,6 +39,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
 import { FaHeart } from "react-icons/fa"
+import { motion, AnimatePresence } from "framer-motion"
 
 import type { Exercise, Workout } from "@/types/workout"
 import type { User } from "@/types/user"
@@ -220,38 +221,61 @@ const WorkoutCard = ({
               </h1>
             </div>
             {user && cardUser && (
-              <div>
-                {isFollowing ? (
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button>
-                        <Check />
-                        Following
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          Unfollow {cardUser.name}?
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want unfollow?
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleUnfollowUser}>
-                          Unfollow
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                ) : (
-                  <Button variant="outline" onClick={handleFollowUser}>
-                    Follow
-                  </Button>
-                )}
-              </div>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={isFollowing ? "following" : "follow"}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  {isFollowing ? (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground"
+                        >
+                          <motion.div
+                            className="flex items-center"
+                            initial={{ width: "auto" }}
+                            animate={{ width: "auto" }}
+                          >
+                            <Check className="mr-2 h-4 w-4" />
+                            Following
+                          </motion.div>
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            Unfollow {cardUser.name}?
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to unfollow?
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={handleUnfollowUser}>
+                            Unfollow
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  ) : (
+                    <Button variant="outline" onClick={handleFollowUser}>
+                      <motion.div
+                        className="flex items-center"
+                        initial={{ width: "auto" }}
+                        animate={{ width: "auto" }}
+                      >
+                        Follow
+                      </motion.div>
+                    </Button>
+                  )}
+                </motion.div>
+              </AnimatePresence>
             )}
           </div>
         )}
@@ -315,16 +339,26 @@ const WorkoutCard = ({
         <div className="flex justify-between mt-4">
           <div className="flex gap-1">
             <Button
-              className="hover:bg-transparent"
+              className="hover:bg-transparent flex items-center overflow-y-clip"
               variant="outline"
               onClick={handleReaction}
             >
               <FaHeart
                 className={`${
                   isLiked && user ? "text-red-500" : "text-gray-400"
-                }`}
+                } mr-1`}
               />
-              {likeCount}
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={likeCount}
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 20 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  {likeCount}
+                </motion.span>
+              </AnimatePresence>
             </Button>
             {displayComments && (
               <Button
