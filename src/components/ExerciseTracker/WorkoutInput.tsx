@@ -156,6 +156,9 @@ export function WorkoutLogModal({
                   mode="single"
                   selected={date}
                   onSelect={(date) => date && setDate(date)}
+                  disabled={(date) =>
+                    date > new Date() || date < new Date("1900-01-01")
+                  }
                   initialFocus
                 />
               </PopoverContent>
