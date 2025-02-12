@@ -43,6 +43,7 @@ import { motion, AnimatePresence } from "framer-motion"
 
 import type { Exercise, Workout } from "@/types/workout"
 import type { User } from "@/types/user"
+import { Link } from "react-router"
 
 interface ExerciseRowProps {
   exercise: Exercise
@@ -215,17 +216,19 @@ const WorkoutCard = ({
                   workout.title || workout.caption ? "mb-4" : ""
                 }`}
               >
-                <div className="flex justify-center items-center gap-2">
-                  <Avatar>
-                    <AvatarImage src={profilePic || cardUser?.profilePic} />
-                    <AvatarFallback>
-                      {username?.at(0) || cardUser?.name.at(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <h1 className="font-bold text-xl">
-                    {username || cardUser?.name}
-                  </h1>
-                </div>
+                <Link to={`profile/${cardUser?.userId}`}>
+                  <div className="flex justify-center items-center gap-2">
+                    <Avatar>
+                      <AvatarImage src={profilePic || cardUser?.profilePic} />
+                      <AvatarFallback>
+                        {username?.at(0) || cardUser?.name.at(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <h1 className="font-bold text-xl">
+                      {username || cardUser?.name}
+                    </h1>
+                  </div>
+                </Link>
                 {user && cardUser && user.userId !== cardUser.userId && (
                   <AnimatePresence mode="wait">
                     <motion.div
