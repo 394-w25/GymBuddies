@@ -73,7 +73,7 @@ export function WorkoutLogModal({
 
   const handleSave = () => {
     onSave({
-      date: new Date(),
+      date,
       startTime,
       endTime,
       exercises,
