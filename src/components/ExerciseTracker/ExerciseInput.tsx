@@ -129,11 +129,11 @@ export function ExerciseCard({
                 </TableCell>
                 <TableCell className="p-0">
                   <Button
-                    variant={"destructive"}
+                    variant={"outline"}
                     className="py-1 px-2"
                     onClick={() => deleteSet(index)}
                   >
-                    <X />
+                    <X color="#c70000" />
                   </Button>
                 </TableCell>
               </TableRow>

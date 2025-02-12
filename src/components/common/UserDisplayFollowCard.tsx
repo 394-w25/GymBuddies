@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Check } from "lucide-react"
 import { listenToFollowingChanged } from "@/lib/db"
+import { Link } from "react-router"
 
 type Props = {
   displayedUser: User
@@ -60,18 +61,20 @@ export default function UserDisplayFollowCard({ displayedUser }: Props) {
 
   return (
     <div className="display-user-with-follow-button flex justify-between items-center min-h-[60px] overflow-hidden px-3 py-1 bg-background w-full">
-      <div className="flex items-center gap-2">
-        <Avatar className="w-10 h-10">
-          <AvatarImage
-            src={`${displayedUser?.profilePic}`}
-            alt={`${displayedUser?.name}`}
-          />
-          <AvatarFallback>
-            {displayedUser?.name.slice(0, 2).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
-        <h1>{displayedUser.name}</h1>
-      </div>
+      <Link to={`profile/${displayedUser?.userId}`}>
+        <div className="flex items-center gap-2">
+          <Avatar className="w-10 h-10">
+            <AvatarImage
+              src={`${displayedUser?.profilePic}`}
+              alt={`${displayedUser?.name}`}
+            />
+            <AvatarFallback>
+              {displayedUser?.name.slice(0, 2).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <h1>{displayedUser.name}</h1>
+        </div>
+      </Link>
 
       {user && !userFollowingLocal.includes(displayedUser.userId) ? (
         <Button variant="outline" onClick={handleFollow}>
