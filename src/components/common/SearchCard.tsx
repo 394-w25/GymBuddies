@@ -13,7 +13,7 @@ import { memo } from "react"
 import * as React from "react"
 import { fuzzySearch } from "@/lib/fuzzy_search"
 import UserDisplayFollowCard from "./UserDisplayFollowCard"
-import { UserRoundSearch } from "lucide-react"
+import { UserSearch } from "lucide-react"
 
 type Props = {
   currentKnownUsers: User[]
@@ -90,21 +90,21 @@ function useSearchCard({ currentKnownUsers }: Props) {
             variant="outline"
             className="rounded-full p-3 flex justify-center items-center"
           >
-            <UserRoundSearch className="h-8 w-8" />
+            <UserSearch className="h-8 w-8" />
           </Button>
         </DialogTrigger>
 
-        <DialogContent className="w-[95%]">
+        <DialogContent className="w-[95%] rounded-2xl">
           <DialogTitle>Search Users</DialogTitle>
           <DialogDescription>Find other users to follow...</DialogDescription>
           <Input
             type="search"
-            placeholder="John Doe"
+            placeholder="Enter a name here..."
             value={searchValue}
             onChange={handleSearchChange}
           />
 
-          <div className="list-of-known-users-matching-search flex flex-col mt-3 gap-1 py-1 border border-gray-200 bg-gray-100 rounded-md justify-start items-center max-h-[30vh] overflow-x-hidden overflow-y-scroll">
+          <div className="list-of-known-users-matching-search flex flex-col py-1 border border-gray-20 rounded-md justify-start items-center max-h-[30vh] overflow-x-hidden overflow-y-scroll">
             {userList.map((user, key) => (
               <UserDisplayFollowCard displayedUser={user} key={key} />
             ))}

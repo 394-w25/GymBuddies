@@ -77,6 +77,24 @@ export const getAllUsers = async (): Promise<User[]> => {
   }
 }
 
+export const listenToUsers = (
+  callback: (users: { [key: string]: User }) => void
+) => {
+  const usersRef = ref(database, "users")
+
+  const listener = onValue(usersRef, (snapshot) => {
+    if (snapshot.exists()) {
+      const users = snapshot.val()
+      callback(users)
+    } else {
+      callback({})
+    }
+  })
+
+  // Return unsubscribe function
+  return () => off(usersRef, "value", listener)
+}
+
 // Workout Functions
 export const addWorkout = async (userId: string, workout: WorkoutLog) => {
   const workoutId = uuidv4()
