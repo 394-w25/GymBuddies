@@ -33,6 +33,7 @@ import {
 } from "@/lib/db"
 import { Workout } from "@/types/workout"
 import WeightliftingChart from "@/components/Profile/WeightliftingChart"
+import FollowingFollowerProfileElement from "@/components/Profile/FollowingFollowerProfileElement"
 import { getPoundsPerPeriod } from "@/lib/count_workouts"
 import { useNavigate, useParams } from "react-router"
 import { User } from "@/types/user"
@@ -177,20 +178,7 @@ const Profile = () => {
             )}
 
             {/* FOLLOWERS AND FOLLOWING */}
-            <div className="follower-following flex flex-row w-full gap-10 justify-center items-center">
-              <p className="">
-                <span className="font-bold">
-                  {friendsData.followers.length}
-                </span>{" "}
-                Followers
-              </p>
-              <p className="">
-                <span className="font-bold">
-                  {friendsData.following.length}
-                </span>{" "}
-                Following
-              </p>
-            </div>
+            <FollowingFollowerProfileElement friends={friendsData} />
 
             {user && profileUser.userId !== user.userId && (
               <div className="mt-2">

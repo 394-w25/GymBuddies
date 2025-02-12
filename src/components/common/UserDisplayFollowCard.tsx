@@ -20,10 +20,11 @@ import { listenToFollowingChanged } from "@/lib/db"
 import { Link } from "react-router"
 
 type Props = {
-  displayedUser: User
+  displayedUser: User;
+  followingList? : boolean;
 }
 
-export default function UserDisplayFollowCard({ displayedUser }: Props) {
+export default function UserDisplayFollowCard({ displayedUser, followingList=false }: Props) {
   const { user } = useUser()
   const [userFollowingLocal, setUserFollowingLocal] = useState<string[]>(
     user?.following || []
@@ -76,36 +77,41 @@ export default function UserDisplayFollowCard({ displayedUser }: Props) {
         </div>
       </Link>
 
-      {user && !userFollowingLocal.includes(displayedUser.userId) ? (
-        <Button variant="outline" onClick={handleFollow}>
-          Follow
-        </Button>
-      ) : (
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button>
-              <Check />
-              Following
+      {!followingList &&
+        <>
+          {user && !userFollowingLocal.includes(displayedUser.userId) ? (
+            <Button variant="outline" onClick={handleFollow}>
+              Follow
             </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>
-                Unfollow {displayedUser.name}?
-              </AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want unfollow?
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleUnfollow}>
-                Unfollow
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      )}
+          ) : (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button>
+                  <Check />
+                  Following
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>
+                    Unfollow {displayedUser.name}?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want unfollow?
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleUnfollow}>
+                    Unfollow
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+
+          )}
+        </>
+      }
     </div>
   )
 }
